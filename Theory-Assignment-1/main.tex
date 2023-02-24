@@ -1,0 +1,708 @@
+\documentclass[12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{theorem}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{tabularx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+
+\newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
+\newtheorem{claim}{Claim}
+\newtheorem{case}{Case}
+
+\geometry{bottom=30mm, top=30mm, left=30mm, right=30mm}
+
+\title{
+    \textbf{\Huge{Theory Assignment 1}} \\
+    \vspace*{15pt}
+    \large{CSE222: \textit{Algorithm Design \& Analysis}}
+}
+
+\author{
+    \href{mailto:divyajeet21529@iiitd.ac.in}{Divyajeet Singh (2021529)}
+}
+
+\date{
+    \vspace*{10pt}
+    \textbf{\today}
+}
+
+\graphicspath{{./Assets/}}
+
+
+\begin{document}
+    \maketitle
+
+    \section*{\huge{Problem-1}}
+    Consider the problem of putting $L$-shaped tiles (consisting of three squares) in an $N \times N$ square-board.
+    You can assume that $N$ is a power of 2.
+    Suppose that one square of this board is defective and tiles cannot be put in that square.
+    Also, two $L$-shaped tiles cannot intersect each other.
+    Describe an algorithm that computes a proper tiling of the board.
+    Justify the running time of your algorithm.
+
+    \subsection*{Input}
+    A square board $S$ of side $N$ ($N = 2^{k}; \ k \ge 1$). \\
+    A defective square $P = (x, y)$ on the board ($1 \le x, y \le N$, measured from top-left given in the format of (row, column)).
+
+    \subsection*{Output}
+    A proper tiling of $S$, wherein each tile may be represented using a
+    unique integer.
+
+    \subsection*{Solution}
+    The given problem is a naturally recursive problem.
+    To solve the problem, we use the Divide \& Conquer paradigm.
+    Using this technique, we divide the board into four equal sub-boards and recursively
+    tile each board until the entire board is tiled.
+    \vspace*{10pt} \\
+    Like any typical Divide \& Conquer algorithm, we can break down the solution into three key steps,
+    namely, \textbf{Divide}, \textbf{Conquer}, and \textbf{Combine}.
+
+    \subsubsection*{The Divide Step}
+    The board is recursively divided into four square sub-boards of side length $\frac{N}{2}$,
+    with a base case of $N = 2$.
+    Figure (\ref{fig:divide}) shows a rough diagram depicting this step.
+    \begin{figure}[htp]
+        \begin{center}
+            \includegraphics[width=0.265\textwidth]{divide-1.png}
+        \end{center}
+        \caption{Recursive Division of $S_{n}$, a board of side $n$}
+        \label{fig:divide}
+    \end{figure}
+    \vspace*{10pt} \\
+    As shown above, for any $N = n$, we label the four $2^{n-1} \times 2^{n-1}$ sub-boards as:
+    \begin{enumerate}
+        \item $A_{n/2}$: The top-left sub-board.
+        \item $B_{n/2}$: The top-right sub-board.
+        \item $C_{n/2}$: The bottom-left sub-board.
+        \item $D_{n/2}$: The bottom-right sub-board.
+    \end{enumerate}
+    If $T(S_{n}, P)$ denotes the problem of tiling $S_{n}$ of size $n \times n$ with defective square $P = (x, y)$,
+    then, for each of these sub-problems, we decide the defective squares and sub-problems as follows:
+
+    \begin{enumerate}
+        \item
+        If $P$ lies in $A_{n/2}$:
+        \begin{enumerate}
+            \item $T\left(A_{n/2}, \left(x, y\right)\right)$ is the problem of tiling $A_{n/2}$.
+            \item $T\left(B_{n/2}, \left(\frac{n}{2}, 1\right)\right)$ is the problem of tiling $B_{n/2}$.
+            \item $T\left(C_{n/2}, \left(1, \frac{n}{2}\right)\right)$ is the problem of tiling $C_{n/2}$.
+            \item $T\left(D_{n/2}, \left(1, 1\right)\right)$ is the problem of tiling $D_{n/2}$.
+        \end{enumerate}
+        \item
+        If $P$ lies in $B_{n/2}$:
+        \begin{enumerate}
+            \item $T\left(A_{n/2}, \left(\frac{n}{2}, \frac{n}{2}\right)\right)$ is the problem of tiling $A_{n/2}$.
+            \item $T\left(B_{n/2}, \left(x, y-\frac{n}{2}\right)\right)$ is the problem of tiling $B_{n/2}$.
+            \item $T\left(C_{n/2}, \left(1, \frac{n}{2}\right)\right)$ is the problem of tiling $C_{n/2}$.
+            \item $T\left(D_{n/2}, \left(1, 1\right)\right)$ is the problem of tiling $D_{n/2}$.
+        \end{enumerate}
+        \item
+        If $P$ lies in $C_{n/2}$:
+        \begin{enumerate}
+            \item $T\left(A_{n/2}, \left(\frac{n}{2}, \frac{n}{2}\right)\right)$ is the problem of tiling $A_{n/2}$.
+            \item $T\left(B_{n/2}, \left(\frac{n}{2}, 1\right)\right)$ is the problem of tiling $B_{n/2}$.
+            \item $T\left(C_{n/2}, \left(x-\frac{n}{2}, y\right)\right)$ is the problem of tiling $C_{n/2}$.
+            \item $T\left(D_{n/2}, \left(1, 1\right)\right)$ is the problem of tiling $D_{n/2}$.
+        \end{enumerate}
+        \item
+        If $P$ lies in $D_{n/2}$:
+        \begin{enumerate}
+            \item $T\left(A_{n/2}, \left(\frac{n}{2}, \frac{n}{2}\right)\right)$ is the problem of tiling $A_{n/2}$.
+            \item $T\left(B_{n/2}, \left(\frac{n}{2}, 1\right)\right)$ is the problem of tiling $B_{n/2}$.
+            \item $T\left(C_{n/2}, \left(1, \frac{n}{2}\right)\right)$ is the problem of tiling $C_{n/2}$.
+            \item $T\left(D_{n/2}, \left(x-\frac{n}{2}, y-\frac{n}{2}\right)\right)$ is the problem of tiling $D_{n/2}$.
+        \end{enumerate}
+    \end{enumerate}
+    \begin{figure}[htp]
+        \begin{center}
+            \includegraphics[width=0.40\textwidth]{divide-2.png}
+        \end{center}
+        \caption{Division into sub-problems when $P = (3, 2)$ lies in $A_{4}$ of $S_{8}$}
+        \label{fig:example}
+    \end{figure}
+    \textbf{Note:}
+    In the case of sub-problems except when $P$ lies in $A_{n/2}$, the coordinates of the
+    defective square are modified such that it lies in that particular sub-board.
+    \vspace*{10pt} \\
+    Figure (\ref{fig:example}) shows the division of an example board $S_{8}$ into sub-problems when the defective tile is
+    represented by $P = (3, 2)$, lies in $A_{4}$.
+    The pink tile is \textit{defective}, and the blue tiles are \textit{defect}s introduced to solve the sub-problems.
+    The other cases follow by rotational symmetry.
+    \vspace*{10pt} \\
+    \textbf{Note:} The above procedure is applied on all four sub-problems, namely $A_{n/2}$, $B_{n/2}$, $C_{n/2}$, and $D_{n/2}$,
+    recursively until the base case is reached.
+
+    \subsubsection*{The Conquer Step}
+    The conquer step is the most important step in the Divide \& Conquer paradigm.
+    In this step, the base case of the problem, i.e., $N = 2$ is solved.
+    In the base case $T(S_{2}, (x_{0}, y_{0}))$ where $P_{0} = (x_{0}, y_{0})$ is defective, only one of four possibilities can occur:
+    \begin{enumerate}
+        \item $P_{0} = A_{1}$, i.e. the top-left square is defective.
+        \item $P_{0} = B_{1}$, i.e. the top-right square is defective.
+        \item $P_{0} = C_{1}$, i.e. the bottom-left square is defective.
+        \item $P_{0} = D_{1}$, i.e. the bottom-right square is defective.
+    \end{enumerate}
+    In each of these cases, we can tile the board by placing an $L$-shaped tile such that it does not touch the defective square.
+    This is a constant time operation, since it only requires us to place a tile in a (given) particular position.
+
+    \subsubsection*{The Combine Step}
+    For the final step, the solutions of the sub-problems are combined to obtain the solution of the original problem.
+    For any $N = n$, when all four of its sub-problems are solved, the only remaining \textit{defective} (untiled) squares are
+    three of the four center-most squares of the board.
+    The $L$-shaped gap so formed can be filled by placing an $L$-shaped tile.
+    The combine step is also done within constant time, since it only requires us to place a tile in a (given) particular position.
+    \vspace*{10pt} \\
+    Figure (\ref{fig:combine}) shows a rough illustration of this step.
+    \vspace*{10pt}
+    \begin{figure}[htp]
+        \begin{center}
+            \includegraphics[width=0.35\textwidth]{combine.png}
+        \end{center}
+        \caption{Filling the $L$-shaped gap formed in the center by placing a tile}
+        \label{fig:combine}
+    \end{figure}
+
+    \subsubsection*{The complete Recursive Algorithm}
+    The complete recursive algorithm consists of the following steps:
+    \begin{enumerate}
+        \item Recursively divide the board of size $N = n$ into four sub-boards until the base case of $N = 2$ is reached.
+        \item Solve the sub-problems recursively as described above, by placing tiles without touching any defective square.
+        \item Combine the solutions of the sub-problems by placing an $L$-shaped tile in the gap formed by the three defective squares in the middle.
+    \end{enumerate}
+
+    \subsubsection*{Pseudocode for the Place-tile subroutine}
+    A subroutine, $\Call{Place-tile}{S, X}$, is used to place an $L$-shaped tile (numbered $X$) in the given board $S_{2}$ without touching any defective square.
+    \vspace{20pt} \\
+    Figure (\ref{fig:place_tile}) shows a diagram of how a tile is placed.
+    Other base case solutions follow by rotational symmetry.
+    Note that in any case, however, the tile is never placed on the defective square.
+    A tile is \textit{placed} by assigning a unique number to the squares it covers.
+    \vspace*{10pt}
+    \begin{figure}[htp]
+        \begin{center}
+            \includegraphics[width=0.325\textwidth]{place_tile.png}
+        \end{center}
+        \caption{Tiling a $2 \times 2$ board without touching any defective square (base case $S_{2}$)}
+        \label{fig:place_tile}
+    \end{figure}
+    \vspace*{10pt} \\
+    The subroutine also updates the unique label $X$ which it has already used to place a tile.
+    Algorithm~(\ref{alg:place_tile}) shows a pseudocode for the subroutine $\Call{Place-tile}{S, X}$.
+    \begin{algorithm}
+        \caption{An algorithm to place one $L$-shaped tile in given $2 \times 2$ board without touching any defective square}
+        \label{alg:place_tile}
+        \begin{algorithmic}[1]
+            \Procedure{Place-tile}{$S[1:2][1:2]$, $X$}:
+                \If{$S[1, 1]$ is defective}
+                    \State $S[1, 2] = S[2, 1] = S[2, 2] \gets X$
+                \ElsIf{$S[1, 2]$ is defective}
+                    \State $S[1, 1] = S[2, 1] = S[2, 2] \gets X$
+                \ElsIf{$S[2, 1]$ is defective}
+                    \State $S[1, 1] = S[1, 2] = S[2, 2] \gets X$
+                \Else
+                    \State $S[1, 1] = S[1, 2] = S[2, 1] \gets X$
+                \EndIf
+                \State $X \gets X + 1$
+                \State \Return $S$
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsubsection*{Pseudocode for the complete recursive algorithm}
+    The pseudocode for the complete recursive algorithm is given in Algorithm~(\ref{alg:tiling}).
+
+    \begin{algorithm}
+        \caption{An algorithm to tile a board of size $N = 2^{k}$ with one defective square with $L$-shaped tiles}
+        \label{alg:tiling}
+        \begin{algorithmic}[1]
+            \Procedure{Tile}{$S[1:N][1:N]$, $P(x, y)$}:
+                \If{$N = 2$}
+                    \State \Return \Call{Place-tile}{$S$, $X$}
+                \Else
+                    \State $n_{0} \gets N/2$
+                    \If{$x \le n_{0}$ \textbf{and} $y \le n_{0}$}
+                        \State $P_{1} \gets (x, y)$
+                        \State $P_{2} \gets (n_{0}, 1)$
+                        \State $P_{3} \gets (1, n_{0})$
+                        \State $P_{4} \gets (1, 1)$
+                    \ElsIf{$x \le n_{0}$ \textbf{and} $y > n_{0}$}
+                        \State $P_{1} \gets (n_{0}, n_{0})$
+                        \State $P_{2} \gets (x, y-n_{0})$
+                        \State $P_{3} \gets (1, n_{0})$
+                        \State $P_{4} \gets (1, 1)$
+                    \ElsIf{$x > n_{0}$ \textbf{and} $y \le n_{0}$}
+                        \State $P_{1} \gets (n_{0}, n_{0})$
+                        \State $P_{2} \gets (n_{0}, 1)$
+                        \State $P_{3} \gets (x-n_{0}, y)$
+                        \State $P_{4} \gets (1, 1)$
+                    \Else
+                        \State $P_{1} \gets (n_{0}, n_{0})$
+                        \State $P_{2} \gets (n_{0}, 1)$
+                        \State $P_{3} \gets (1, n_{0})$
+                        \State $P_{4} \gets (x-n_{0}, y-n_{0})$
+                    \EndIf
+                    \State \Call{Tile}{$S[1:n_{0}][1:n_{0}], P_{1}$}
+                    \State \Call{Tile}{$S[1:n_{0}][n_{0}+1:N], P_{2}$}
+                    \State \Call{Tile}{$S[n_{0}+1:N][1:n_{0}], P_{3}$}
+                    \State \Call{Tile}{$S[n_{0}+1:N][n_{0}+1:N], P_{4}$}
+                    \State \Call{Place-tile}{$S[n_{0}:n_{0}+1][n_{0}:n_{0}+1]$, $X$}
+                    \State \Return $S$
+                \EndIf
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \pagebreak
+
+    \subsubsection*{Runtime Analysis of the Algorithm}
+    It is easy to see that the recurrence relation for the above algorithm is given by:
+    \begin{equation}
+        T(N) = 4 T \left( \frac{N}{2} \right) + C
+    \end{equation}
+    with the base case of $T(2) = 1$. \\
+    We simplify the recurrence relation and solve it mathematically as follows:
+    \begin{align}
+        T(N) &= 4 T \left( \frac{N}{2} \right) + C \nonumber \\
+        &= 4 \left( 4 T \left( \frac{N}{4} \right) + C \right) + C \nonumber \\
+        &= 4 \left( 4 \left( 4 T \left( \frac{N}{8} \right) + C \right) + C \right) + C \nonumber \\
+        &= \cdots \nonumber \\
+        &= 4^{i} \ T \left( \frac{N}{2^{i}} \right) + C \sum_{j=0}^{i-1} 4^{j} \\
+        &= 4^{i} \ T \left( \frac{N}{2^{i}} \right) + C \left( \frac{4^{i} - 1}{3} \right) \nonumber \\
+        &= 4^{i} \ T \left( \frac{N}{2^{i}} \right) + C_{0} ({4^{i} - 1}) \hspace*{30pt} \left(\text{assuming } C_{0} = \frac{C}{3} \right)
+    \end{align}
+    where $i$ is the number of steps needed to reach the base case. The base case is reached when:
+    \begin{align}
+        \frac{N}{2^{i}} = 2 &\implies N = 2^{i + 1} \nonumber \\
+        &\implies N \ge 2^{i} \implies i \le \log_{2}{N}
+    \end{align}
+    Therefore, the solution to the recurrence relation becomes (at $i = \log_{2}{N}$):
+    \begin{align}
+        T(N) &\le 4^{i} \ T \left( \frac{N}{2^{i}} \right) + C_{0} \ 4^{i} \nonumber \\
+        &= 4^{\log_{2}{N}} \ T \left( 2 \right) + C_{0} \ 4^{\log_{2}{N}} \nonumber \\
+        &= 2^{2\log_{2}{N}} (1) + C_{0} \ 2^{2\log_{2}{N}} \nonumber \\
+        &= 2^{\log_{2}{N^{2}}} + C_{0} \ 2^{\log_{2}{N^{2}}} \nonumber \\
+        &= C_{1} N^{2} \hspace*{30pt} \hfill (\text{assuming } C_{1} = 1 + C_{0})
+    \end{align}
+    Since $\exists \ c \in \mathbb{R}$ such that $T(N) \le c N^{2} \ \ \forall N \ge 2$, we conclude that the algorithm runs in $O(N^{2})$ time,
+    where $N = 2^{k}$ is the side of the input board.
+
+    \pagebreak
+
+    \section*{\huge{Problem-2}}
+    Suppose we are given a set $L$ of $n$ line segments in 2D plane.
+    Each line segment has one endpoint on the line $y = 0$ and one endpoint on the line $y = 1$.
+    All the $2n$ points are distinct.
+    Give an algorithm that uses dynamic programming and computes a largest subset of $L$ of which every pair of segments intersects each other.
+    You must also give a justification why your algorithm works correctly.
+
+    \subsection*{Input}
+    A list $L$ of $n$ line segments. \\
+    Each line segment is of the form $(x_{0}, x_{1})$, representing its $x$-coordinates on the lines $y = 0$ and $y = 1$ respectively.
+
+    \subsection*{Output}
+    The length of a largest subset of $L$ of which every pair of segments intersects each other.
+
+    \subsection*{Solution}
+    The given problem can be solved with the Longest Decreasing Subsequence algorithm which is implemented using Dynamic Programming paradigm.
+    The solution makes use of an optimized version of the LDS algorithm which uses binary search and runs in $O(n \log{n})$ time for a list of $n$ numbers.
+
+    \subsubsection*{Terminologies and Definitions}
+    \begin{definition}[Inversion]
+        \label{def:inversion}
+        Let $P[1:p]$ be a list of $p$ numbers.
+        An inversion of $P$ is a pair of indices $(i, j)$ such that $i < j$ and $P[i] > P[j]$.
+    \end{definition}
+
+    \begin{definition}[Longest Decreasing Subsequence (LDS)]
+        \label{def:lds}
+        Let $P[1:p]$ be a list of $p$ numbers.
+        The LDS of $P$ is the longest subset $Q[1:q]$ of $P$ such that the $Q$ is a monotonically non-increasing array, i.e.
+        $Q[i] \ge Q[i+1] \ \forall \ 1 \le i \le q$.
+    \end{definition}
+
+    \begin{definition}[Largest Intersecting Set]
+        \label{def:lis}
+        Let $L[1:n]$ be a list of $n$ line segments.
+        The largest intersecting set of $L$ is the largest subset $Q[1:q]$ of $L$ such that $Q[i]$ intersects $Q[j] \ \forall \ 1 \le i, j \le q$.
+    \end{definition}
+
+    \subsubsection*{Preprocessing}
+    We first sort the input list $L$ by the $x_{0}$-coordinate of each line segment.
+    This can be done using any common sorting algorithm, such as $\Call{Merge-sort}{L[1:n]}$ routine covered in class. \\
+    The sorting step can be achieved in $\Theta(n \log{n})$ time. \\
+    \textit{Reason for Sorting:}
+    \vspace*{2.5pt} \\
+    When $L$ is sorted in the aforementioned fashion, then two line segments intersect each other if and only if their $x_{1}$-coordinates form an inversion.
+    This means that more than two line segments mutually intersect each other if and only if their $x_{1}$-coordinates are in monotonically non-increasing order.
+    Hence, the longest decreasing subsequence of the $x_{1}$-coordinates of sorted $L$ forms the \textit{largest intersecting set} of $L$.
+    \vspace*{10pt} \\
+    Figure \ref{fig:lines} illustrates the said idea.
+    \begin{figure}[htp]
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{lines.png}
+        \end{center}
+        \caption{An example of $L[1:4]$ sorted by $x_{0}$-coordinates}
+        \label{fig:lines}
+    \end{figure}
+    \vspace*{5pt} \\
+    \textbf{Note:} No tie-breaker is needed for sorting since all the points are unique.
+
+    \subsubsection*{Decomposition into Sub-Problems}
+    The given problem of $L[1:n]$ is broken down into overlapping sub-problems of the form $L[1:i] \ \forall \ 1 \le i \le n$.
+    For each problem, say $S[i]$, we intend to find the length of a \textit{largest intersecting set} of $L[1:i]$. \\
+    Such a subset can be found by finding the largest subset of $L[1:i-1]$ that intersects $L[i]$.
+    Hence, this decomposition of the given problem into smaller sub-problems guarantees substructure optimality.
+    This is because at any step, we can find the optimal solution using the optimal solutions obtained in the previous steps.
+
+    \subsubsection*{Recurrence Relation}
+    Let $S[i]$ be the length of a \textit{largest intersecting set} of $L[1:i]$.
+    Then, the following recurrence relation can be defined:
+    \begin{equation}
+        S[i] = \begin{cases}
+            1 & \text{if } i = 1 \\
+            1 + \max_{1 \le j < i} (S[j]) & \text{if } \exists \ 1 \le j < i \text{ such that } L[j] \text{ intersects } L[i] \\
+            1 & \text{otherwise}
+        \end{cases}
+    \end{equation}
+    Using the above recurrence relation, we can find the length of a \textit{largest intersecting subset} of $L[1:i] \ \forall \ 1 \le i \le n$
+    and maintain it in an $n \times 1$ dynamic programming table.
+
+    \subsubsection*{Base Case and Solvable Sub-Problems}
+    The base case of the above recurrence relation is $S[1] = 1$.
+    This is because the length of the \textit{largest intersecting subset} of $L[1:1]$ is $1$, as $L[1]$ must intersect itself.
+    \vspace*{10pt} \\
+    The sub-problem that solves the original problem is $S[n]$, the solution to $L[1:n]$.
+
+    \subsubsection*{The complete Algorithm}
+    The complete algorithm consists of the following steps:
+    \begin{enumerate}
+        \item Sort the input list $L$ by the $x_{0}$-coordinate of each line segment.
+        \item In the sorted array, find the LDS of the $x_{1}$-coordinates of the line segments.
+        \item The length of the LDS is the length of a \textit{largest intersecting subset} of $L$.
+    \end{enumerate}
+
+    \subsubsection*{Pseudocode for the Lower-bound subroutine}
+    To complete the LDS algorithm, we use a subroutine $\Call{Lower-bound}{A[1:n], x}$, a binary-search like algorithm that
+    returns the index of the first element in the range $[1, n)$ that is not less than $x$.
+    \vspace*{10pt}\\
+    The pseudocode for the subroutine is given in Algorithm~(\ref{alg:lower-bound}).
+
+    \begin{algorithm}
+        \caption{An algorithm to find the lower-bound of a value in a sorted array}
+        \label{alg:lower-bound}
+        \begin{algorithmic}[1]
+            \Procedure{Lower-bound}{$A[1:n], x$}:
+                \State $low \gets 1$
+                \State $high \gets n$
+                \While{$low < high$}
+                    \State $mid \gets \left\lfloor \frac{low + high}{2} \right\rfloor$
+                    \If{$A[mid] < x$}
+                        \State $low \gets mid + 1$
+                    \Else
+                        \State $high \gets mid$
+                    \EndIf
+                \EndWhile
+                \State \Return $low$
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsubsection*{Pseudocode for the comlete algorithm}
+    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:lds}).
+
+    \begin{algorithm}
+        \caption{An algorithm to find the length of a \textit{largest intersecting subset} of $L$}
+        \label{alg:lds}
+        \begin{algorithmic}[1]
+            \Procedure{Largest-intersecting-subset}{$L[1:n]$}:
+                \State \Call{Merge-sort}{$L[1:n]$}
+                \State $X[1:n] \gets 0$
+                \For{$i \gets 1$ to $n$}
+                    \State $X[i] \gets L[i].x_{1}$
+                \EndFor
+                \State $len \gets 1$
+                \State $dp[1:n] \gets 0$
+                \State $dp[1] \gets X[1]$
+                \For{$i \gets 2$ to $n$}
+                    \State $dp[i] \gets 1$
+                    \If{$X[i] < dp[len]$}
+                        \State $len \gets len + 1$
+                        \State $dp[len] \gets X[i]$
+                    \Else
+                        \State $j \gets \Call{Lower-bound}{dp[len:1], X[i]}$
+                        \State $dp[j] \gets X[i]$
+                    \EndIf
+                \EndFor
+            \State \Return $len$
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsubsection*{Runtime Analysis of the Algorithm}
+    The following operations are performed in the algorithm:
+    \begin{enumerate}
+        \item $\Call{Merge-sort}{L[1:n]}$
+        This step takes $\Theta(n \log{n})$ time, where $n$ is the number of line segments in $L$.
+        \item Copy the $x_{1}$-coordinates of the line segments into a new array $X[1:n]$.
+        This step takes $\Theta(n)$ time, as we linearly loop over $L$ once.
+        \item Calculation of LDS of $X[1:n]$, which takes $\Theta(n \log{n})$ time using by binary-search inside a linear loop.
+    \end{enumerate}
+    Dominated by the sorting step and the LDS step, the time complexity of the algorithm is $\Theta(n \log{n})$.
+
+    \subsubsection*{Proof of Correctness}
+    The correctness of the algorithm can be proved by the principle of mathematical induction.
+
+    \begin{claim}
+        The algorithm is correct and gives the optimal solution.
+        It gives the length of the \textit{largest (possible) intersecting subset} of $L[1:n]$.
+    \end{claim}
+    \textit{Proof.}
+    \begin{quote}
+        \textbf{Base Case}
+        \vspace*{2.5pt} \\
+        The base case of the induction is $n = 1$, where we consider the set $L[1:1]$ consisting of $1$ line segment.
+        The length of the \textit{largest intersecting subset} of $L[1:1]$ is $1$.
+        This is because $L[1]$ must intersect itself.
+        \vspace*{7.5pt} \\
+        \textbf{Induction Hypothesis}
+        \vspace*{2.5pt} \\
+        Assume that the claim holds true $\forall j \le k$ for some $k \le n$, i.e. the algorithm produces the correct
+        result for every subset $L[1:j] \ (j \le k)$.
+        The claim that the algorithm works correctly for $L[1:k+1]$ must be proved.
+        \vspace*{7.5pt} \\
+        \textbf{Inductive Step}
+        \vspace*{2.5pt} \\
+        Let $L[k+1]$ be the current line segment in consideration, that could be added to $L[1:k]$.
+        Then ony three (mutually exclusive) cases are possible:
+        \begin{enumerate}
+            \item
+            \begin{case}
+                $L[k+1]$ does not intersect any line segment in $L[1:k]$.
+            \end{case}
+            The length of the \textit{largest intersecting subset} of $L[1:k+1]$ is $1$.
+            This is because $L[k+1]$ must intersect (at least) itself.
+            \item
+            \begin{case}
+                $L[k+1]$ intersects some (not all) line segment(s) in $L[1:k]$.
+            \end{case}
+            Let $m = \max_{1 \le j < k} (S[j])$.
+            Then, $m$ is the maximum number of mutually intersecting line segments that also intersect with $L[k+1]$.
+            The length of the \textit{largest intersecting subset} of $L[1:k+1]$ is $1 + m$.
+            \footnote{
+                The algorithm finds $m$ using the Longest Decreasing Subsequence algorithm.
+                Refer to \textit{Reason for Sorting} under \textbf{Preprocessing}.
+            }
+            \item
+            \begin{case}
+                $L[k+1]$ intersects all the line segments in $L[1:k]$.
+            \end{case}
+            The length of the \textit{largest intersecting subset} of $L[1:k+1]$ is $k+1$.
+            This is because $L[k+1]$ intersects all $k+1$ line segments in $L[1:k+1]$ including itself.
+        \end{enumerate}
+        According to the assumption, the size of the \textit{largest intersecting subset}s of $L[1:j]$ are given by $S[j] \ \forall j \le k$.
+        The size of the \textit{largest intersecting subset} of $L[1:k+1]$ can be found using the above.
+        In each case, the subset so produced is indeed the largest, as it is the only subset that satisfies the constraints.
+        \vspace*{7.5pt} \\
+        Hence, the claim is proved. \hfill $\square$
+    \end{quote}
+    \vfill
+    \pagebreak
+
+    \section*{\huge{Problem-3}}
+    Suppose that an equipment manufacturing company manufactures $s_{i}$ units in the $i^{th}$ week.
+    Each week's production has to be shipped by the end of that week.
+    Every week, one of three shipping agents $A$, $B$, and $C$ are involved in shipping the week's production.
+    Their charges are given as follows:
+    \begin{itemize}
+        \item
+        Company $A$ charges $a$ rupees per unit.
+        \item
+        Company $B$ charges $b$ rupees per week (irrespective of the number of units), but will only ship for a block of 3 consecutive weeks.
+        \item
+        Company $C$ charges $c$ rupees per unit but returns a reward of d rupees per week, and will not ship for a block of more than 2 consecutive weeks.
+        It means that if $s_{i}$ unit is shipped in the $i^{th}$ week through company $C$, then the cost for $i^{th}$ week will be $cs_{i} - d$.
+    \end{itemize}
+    The total cost of the schedule is the total cost to be paid to the agents. If $s_{i}$ units are produced in the $i^{th}$ week, then they must be shipped
+    in the $i^{th}$ week.
+    Give an efficient algorithm that computes a schedule of minimum cost.
+
+    \subsection*{Input}
+    A list $s$ of the number of units manufactured in $n$ weeks. \\
+    $a$, the fare charged by company A per unit. \\
+    $b$, the fare charged by company B per week. \\
+    $c$, the fare charged by company C per unit. \\
+    $d$, the total discount given by company C per week.
+
+    \subsection*{Output}
+    The minimum cost that can be obtained using an optimal schedule.
+
+    \subsection*{Solution}
+    The given problem can be efficiently solved using Dynamic Programming paradigm.
+    Dynamic programming allows for the calculation of the cost of an optimal schedule that ends at the $i^{th}$ week ($\forall \ 1 \le i \le n)$.
+
+    \subsubsection*{Notations Used}
+    \begin{notation}[$A_{i}$]
+        Let $A_{i} = a s_{i}$ denote the cost of shipping the production of the $i^{th}$ week using company $A$.
+    \end{notation}
+
+    \begin{notation}[$B_{i}$]
+        Let $B_{i} = 3b$ denote the cost of shipping the production of weeks $i-2$ to $i$ using company $B$.
+        Note that $B_{i}$ is a constant (independent of the current week, $i$).
+    \end{notation}
+
+    \begin{notation}[$C_{i}$]
+        Let $C_{i} = c s_{i} - d$ denote the cost of shipping the production of the $i^{th}$ week using company $C$.
+    \end{notation}
+
+    \begin{notation}[$M[{i, X]}$]
+        Let $M[{i, X]}$ denote the minimum cost of shipping till the end of the $i^{th}$ week using company $X$ for the $i^{th}$ week
+    \end{notation}
+
+    \begin{notation}[$M{[i]}$]
+        Let $M{[i]} = [M{[i, A]}, M{[i, B]}, M{[i, C]}]$ represent the $i^{th}$ row of the dynamic programming table, $M$.
+    \end{notation}
+
+    \begin{notation}[$Paths{[i]}$]
+        Let $Paths{[i]}$ denote the set of schedules that use $C$ for the $i^{th}$ week.
+        It only considers the last two weeks.
+        $$Paths{[i]} = (M{[i-1, A]}, M{[i-1, B]}, M{[i-2, A]} + C_{i-1}, M{[i-2, B]} + C_{i-1})$$
+    \end{notation}
+
+    \subsubsection*{Decomposition into Sub-Problems}
+    The given problem of $s[1:n]$ is broken down into overlapping sub-problems of the form $s[1:i] \ \forall \ 1 \le i \le n$.
+    For each problem, say $M[i]$, we intend to find the minimum cost of shipping till the end of the $i^{th}$ week.
+    Such optimal cost can be found by considering the optimal cost of shipping till the end of the $(i-1)^{th}$ week. \\
+    This decomposition of the given problem into smaller sub-problems guarantees substructure optimality.
+    This is because at any step, we can find the optimal solution using the optimal solutions obtained in the previous steps.
+
+    \subsubsection*{Recurrence Relation}
+    To solve this problem, we maintain an $n \times 3 \ (n \ge 3)$ dynamic programming table, $M$, for tabulation.
+    $M$ contains an extra row of zeros at the beginning. \\
+    Then, the following recurrence relations can be defined:
+    \begin{align}
+        M[i, A] &= \begin{cases}
+            0 & \text{if } i = 0 \\
+            A_{1} & \text{if } i = 1 \\
+            \min{M[i-1]} + A_{i} & \text{otherwise}
+        \end{cases} \\
+        M[i, B] &= \begin{cases}
+            0 & \text{if } i = 0 \\
+            \infty & \text{if } 0 < i < 3 \\
+            \min{M[i-3]} + B_{i} & \text{otherwise}
+        \end{cases} \\
+        M[i, C] &= \begin{cases}
+            0 & \text{if } i = 0 \\
+            C_{1} & \text{if } i = 1 \\
+            \min{Paths[i]} + C_{i} & \text{otherwise}
+        \end{cases}
+    \end{align}
+    \vspace*{7.5pt} \\
+    The recurrence relation for $M[i, B]$ ensures that company $B$ is selected in blocks of 3 consecutive weeks only. \\
+    The recurrence relation for $M[i, C]$ ensures that company $C$ can be chosen for no more than 2 consecutive weeks.
+
+    \subsubsection*{Base Case and Solvable Sub-Problems}
+    The base case of the above given recurrence relations for the three companies are:
+    \begin{align}
+        M[i, A] &= \begin{cases}
+            0 & \text{if } i = 0 \\
+            A_{1} & \text{if } i = 1 \\
+        \end{cases} \\
+        M[i, B] &= \begin{cases}
+            0 & \text{if } i = 0 \\
+            \infty & \text{if } 0 < i < 3 \\
+        \end{cases} \\
+        M[i, C] &= \begin{cases}
+            0 & \text{if } i = 0 \\
+            C_{1} & \text{if } i = 1 \\
+        \end{cases}
+    \end{align}
+    The following table represents the base case for the dynamic programming array, $M$:
+
+    \begin{center}
+        \begin{tabular}{| m{12mm} | m{42mm} | m{42mm} | m{42mm} |}
+        \hline
+        Weeks & Company $A$ & Company $B$ & Company $C$ \\
+        \hline \hline
+        0 & 0 & 0 & 0 \\
+        \hline
+        1 & $A_{1}$ & $\infty$ & $C_{1}$ \\
+        \hline
+        2 & $\min{M[1]} + A_{2}$ & $\infty$ & $\min{M[1]} + C_{2}$ \\
+        \hline
+        3 & $\min{M[2]} + A_{3}$ & $\min{M[0]} + B_{3}$ & $\min{Paths[3]} + C_{3}$ \\
+        \hline
+        \end{tabular}
+    \end{center}
+    Even if $n < 3$, we still create $M[1:4][1:3]$ and fill it with the base case values. \\
+    The sub-problem that solves the original problem is given by $\min{M[n]}$, the minimum cost of
+    shipping till the end of the $n^{th}$ week.
+    \vspace*{5pt} \\
+    \textbf{Note:}
+    Due to the given constraints, $B$ cannot be selected in weeks 1 and 2 when $n < 3$.
+    Hence, the base case for $M[i, B] = \infty$ for $1 \le i < 3$.
+
+    \subsubsection*{The complete Algorithm and Pseudocode}
+    The complete algorithm consists of the following steps:
+    \begin{enumerate}
+        \item Initialize the dynmaic programming table following the base case.
+        \item If $n > 3$, iterate over $i$ from 4 to $n$ and tabulate $M$ using the above given recurrence relations.
+        \item Return $\min{M[n]}$. This is the minimum cost of shipping till the end of the $n^{th}$ week.
+    \end{enumerate}
+    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:mincost}).
+    \footnote{
+        The pseudocode of the algorithm makes use of notations introduced in the section \textbf{Notations Used} to make it concise.
+        While implementing the algorithm, notations like $A_{i}$ or $Paths[i]$ can be coded as macros or smaller $\Theta(1)$ subroutines.
+    }
+
+    \begin{algorithm}
+        \caption{An algorithm to find the minimum cost of shipping till the end of the $n^{th}$ week.}
+        \label{alg:mincost}
+        \begin{algorithmic}[1]
+            \Procedure{Find-min-cost}{$s[1:n]$, $a$, $b$, $c$, $d$}:
+                \State $N \gets \max{(4, n+1)}$
+                \State $M[1:N][1:3] \gets 0$
+                \State $M[1] \gets [A_{1}, \infty, C_{1}]$
+                \State $M[2] \gets [\min{M[1]} + A_{2}, \infty, \min{M[1]} + C_{2}]$
+                \State $M[3] \gets [\min{M[2]} + A_{3}, \min{M[0]} + B_{3}, \min{Paths[3]} + C_{3}]$
+                \If{$n > 3$}
+                    \For{$i \gets 4$ to $n$}
+                        \State $M[i, A] \gets \min{M[i-1]} + A_{i}$
+                        \State $M[i, B] \gets \min{M[i-3]} + B_{i}$
+                        \State $M[i, C] \gets \min{Paths[i]} + C_{i}$
+                    \EndFor
+                \EndIf
+                \State \Return $\min{M[n]}$
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsubsection*{Runtime Analysis of the Algorithm}
+    The algorithm initializes the dynamic programming table in constant time.
+    The most computationally heavy part of the algorithm is the linear loop applied on $i$ from 4 to $n$.
+    This is a linear time operation.
+    The three atomic operations used inside the loop simply update the dynamic programming table, and hence take constant time.
+    \vspace*{10pt} \\
+    Hence, the time complexity of the algorithm is $\Theta(n)$, where $n$ is the number of weeks.
+    \vfill
+    \pagebreak
+
+    \section*{Bibliography}
+    \begin{enumerate}
+        \item
+        \href{
+            https://www.geeksforgeeks.org/tiling-problem-using-divide-and-conquer-algorithm/
+        }{\textbf{GeeksforGeeks:} Tiling Problem using Divide \& Conquer algorithm}
+        \item
+        \href{
+            https://www.geeksforgeeks.org/longest-decreasing-subsequence/
+        }{\textbf{GeeksforGeeks:} Longest Decreasing Subsequence}
+     \end{enumerate}
+
+\end{document}
