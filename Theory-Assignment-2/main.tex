@@ -1,0 +1,240 @@
+\documentclass[12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{theorem}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+
+\newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
+\newtheorem{claim}{Claim}
+\newtheorem{case}{Case}
+
+\geometry{bottom=30mm, top=30mm, left=30mm, right=30mm}
+
+\title{
+    \textbf{\Huge{Theory Assignment 2}} \\
+    \vspace*{15pt}
+    \large{CSE222: \textit{Algorithm Design \& Analysis}}
+}
+
+\author{
+    \href{mailto:divyajeet21529@iiitd.ac.in}{Divyajeet Singh (2021529)}
+    \and
+    \href{mailto:agamdeep21306@iiitd.ac.in}{Agamdeep Singh (2021306)}
+}
+
+\date{
+    \vspace*{10pt}
+    \textbf{\today}
+}
+
+\graphicspath{{./Assets/}}
+
+
+\begin{document}
+    \maketitle
+
+    \section*{\huge{Problem-1}}
+    The police department in the city of Computopia has made all the streets one-way.
+    \begin{enumerate}[label=(\alph*)]
+        \item
+        The mayor of the city claims that it is possible to legally drive from an intersection to any other intersection.
+        Formulate this problem as a graph theoretic problem and explain why it can be solved in linear time.
+        \item
+        Suppose the mayor's claim was found to be wrong. She has now made a weaker claim:
+        \textit{"If you start driving from the town-hall, navigating one-way streets, then no matter where you reach,
+        there is always a way to drive legally back to the town-hall."}
+        Formulate this weaker property as a graph theoretic problem and explain how it can be solved in linear time.
+    \end{enumerate}
+
+    \subsection*{Input}
+    A directed graph $G = (V, E)^{*}$ representing the layout of the city.
+    $V$ is the set of all intersections and $E$ is the set of all one-way streets in Computopia.
+    \vspace*{10pt} \\
+    \textbf{Note:} \textit{Formulation of the problem as a graph theoretic problem is given in the subsequent subsection.}
+
+    \subsection*{Output}
+    \begin{enumerate}[label=(\alph*)]
+        \item
+        A boolean value \textit{True} if the mayor's claim is true, else \textit{False}.
+        \item
+        A boolean value \textit{True} the mayor's weaker claim is true, else \textit{False}.
+    \end{enumerate}
+
+    \subsection*{Solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item Check if $G$ is strongly connected in linear time using Kosaraju's algorithm.
+        \item Check the townhall is a part of a strongly connected component in $G$.
+    \end{enumerate}
+
+    \pagebreak
+
+    \section*{\huge{Problem-2}}
+    Assume that $n$ is the number of vertices in a graph.
+    Then, given an edge-weighted connected undirected graph $G = (V, E)$ with $n + 20$ edges, design an algorithm that runs in $O(n)$
+    time and outputs an edge with the smallest weight, connected in a cycle of $G$.
+    You must give a justification why your algorithm works correctly.
+
+    \subsection*{Input}
+    An edge-weighted connected undirected graph $G = (V, E)$ such that $|V| = n$ and $|E| = n + 20$.
+
+    \subsection*{Output}
+    An edge $(u, v)$ with the smallest weight, connected in a cycle of $G$.
+
+    \subsection*{Solution}
+
+    \subsubsection*{Terminologies and Definitions}
+    \begin{definition}[Cut-Edge]
+        \label{def:cut-edge}
+        An edge $(u, v) \in E$ is a cut-edge iff removing it from the graph $G = (V, E)$ disconnects $G$.
+    \end{definition}
+
+    \subsubsection*{The complete Algorithm}
+    \begin{enumerate}
+        \item Maintain a hash table $C[(u, v) \in E] \gets 0$ to mark the cut-edges.
+        \item Find all the cut-edges in $G$, which takes $O(|V| + |E|)$ time.
+        \item While finding the cut-edges, mark the edges that are cut-edges as $1$ in $C$.
+        \item Find the edge with the smallest weight in $E$ such that $C[e] \neq 1$.
+    \end{enumerate}
+
+    \pagebreak
+
+    \section*{\huge{Problem3}}
+    Suppose that $G$ is a directed acyclic graph with the following features:
+    \begin{itemize}
+        \item $G$ has a single source $s$ and several sinks $t_{1}, t_{2}, \dots, t_{k}$.
+        \item Each edge $(v \to w)$ (i.e. an edge directed from $v$ to $w$) has an associated weight $P[v \to w]$ between $0$ and $1$.
+        \item For each non-sink vertex $v$, the total weight of all the edges leaving $v$ is $1$, i.e.
+        \begin{equation}
+            \label{eq:total_weight}
+            \sum_{(v \to w) \in E} P[v \to w] = 1
+        \end{equation}
+    \end{itemize}
+    The weights $P[v \to w]$ define a random walk in $G$ from $s$ to some sink $t_{i}$.
+    After reaching any non-sink vertex $v$, the walk follows the edge $(v \to w)$ with probability $P[v \to w]$.
+    All the probabilities are mutually independent. \\
+    Describe and analyze an algorithm to compute the probability that this random walk reaches sink
+    $t_{i} \ \forall \ i \in \{ 1, 2, \dots, k \}$.
+
+    \subsection*{Input}
+    A weighted directed acyclic graph $G = (V, E)$ having the above properties.
+
+    \subsection*{Output}
+    A sequence of probabilities $P[t_{1}], P[t_{2}], \dots, P[t_{k}]$, where $P[t_{i}]$ is the probability that the random walk
+    reaches sink $t_{i} \ \forall \ i \in \{ 1, 2, \dots, k \}$.
+
+    \subsection*{Solution}
+    The given problem can be efficiently solved by applying dynamic programming on the topologically sorted graph $G$.
+    It allows for the calculation of the probability of reaching every edge $v \in V$ starting from $s$.
+
+    \subsubsection*{Notations Used}
+    \begin{notation}[$P{[v \to w]}$]
+        The weight of the edge $(v \to w) \in E$. This is also the probability of following the edge $(v \to w)$ for the random walk from $v$.
+    \end{notation}
+
+    \begin{notation}[$P{[v]}$]
+        The total probability of reaching vertex $v$ from the source $s$.
+        It also denotes the entry for vertex $v$ in the dynamic programming table.
+    \end{notation}
+
+    \subsubsection*{Preprocessing}
+    We first obtain a total ordering of the given graph $G$ by topologically sorting it.
+    This can be done using the $\Call{Topological-sort}{G}$ routine covered in class. \\
+    The sorting step can be achieved in $\Theta(|V|+|E|)$ time. \\
+    \vspace*{2.5pt} \\
+    \textit{Reason for Sorting:}
+    \vspace*{2.5pt} \\
+    When $G$ is sorted in the aforementioned fashion, then the vertices are ordered such that $v$ appears before $w$ if $(v \to w) \in E$.
+    This allows us to calculate $P[w]$ by using the probabilities $P[v] \ \forall \ (v \to w) \in E$.
+    This is possible because of equation \eqref{eq:total_weight} and the fact that the probabilities are mutually independent.
+
+    \subsubsection*{Decomposition into Sub-Problems}
+    The given problem of finding $P[t_{i}] \ \forall \ 1 \leq i \leq k$ is broken down into overlapping sub-problems of the form $P[v]$, where $v$ is not a sink.
+    For each problem $P[v]$, we intend to find the probability of reaching $v$ from $s$. \\
+    Each probability $P[v]$ can be found by adding the probabilities of reaching $v$ from all vertices having an edge directed to $v$.
+    The existence of $P[u] \ \forall \ (u \to v) \in E$ is guaranteed by the topological ordering. \\
+    Hence, this decomposition of the given problem into smaller sub-problems guarantees substructure optimalilty.
+    This is because at any step, we can find the optimal solution using the optimzal solutions obtained in the previous steps.
+
+    \subsubsection*{Recurrence Relation}
+    Let $P[v]$ be the total probability of reaching any vertex $v$ from the source $s$.
+    Then, the following recurrence relation can be defined:
+    \begin{equation}
+        P[v] = \begin{cases}
+            1 & \text{if } v = s \\
+            \sum\limits_{(u \to v) \in E} P[u] \times P[u \to v] & \text{otherwise}
+        \end{cases}
+    \end{equation}
+    Using the above recurrence relation, we can find $P[v] \ \forall \ v \in V$ and maintain it in a $|V| \times 1$ dynamic programming table.
+
+    \subsubsection*{Base Case and Solvable Sub-Problems}
+    The base case for the above recurrence relation is $P[s] = 1$.
+    This is because the probability of reaching $s$ from the source is $1$, as the random walk starts from $s$.
+    \vspace*{10pt} \\
+    The sub-problems that solve the original problem are $P[t_{i}] \ \forall \ 1 \leq i \leq k$, the probabilities of reaching the sinks $t_{i}$ from $s$.
+
+    \subsubsection*{The complete Algorithm and Pseudocode}
+    The complete algorithm consists of the following steps:
+    \begin{enumerate}
+        \item Topologically sort the graph $G$ to get a total ordering of $V$.
+        \item Initialize the dynamic programming table $P$ following the base case.
+        \item Iterate over the vertices in their topological order and tabulate $P$ using the above recurrence relation.
+        \item Return $P[t_{1}], P[t_{2}], \dots, P[t_{k}]$, the total probabilities of reaching the sinks from $s$.
+    \end{enumerate}
+    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:prob}).
+    \footnote{
+        The pseudocode of the algorithm makes use of notations introduced in the section \textbf{Notations Used}.
+        Here, $P[v \in V_{T}]$ denotes a $|V_{T}| \times 1$ table ordered in the same way as $V_{T}$.
+    }
+
+    \begin{algorithm}
+        \caption{An algorithm to find the probabilities of reaching the sinks from $s$.}
+        \label{alg:prob}
+        \begin{algorithmic}[1]
+            \Procedure{Sink-probability}{$G = (V, E)$}:
+                \State $V_{T} = \Call{Topological-sort}{G}$
+                \State $P[v \in V_{T}] \gets 0$
+                \State $P[s] \gets 1$
+                \For{$v \in V_{T}$}
+                    \For {$(u \to v) \in E$}
+                        \State $P[v] \gets P[v] + P[u] \times P[u \to v]$
+                    \EndFor
+                \EndFor
+                \State \Return $P[t_{1}], P[t_{2}], \dots, P[t_{k}]$
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsubsection*{Runtime Analysis of the Algorithm}
+    The following operations are performed in the algorithm:
+    \begin{enumerate}
+        \item $\Call{Topological-sort}{G}$: This step takes $\Theta(|V|+|E|)$ time.
+        \item Initialization of the dynamic programming table $P$, which takes $\Theta(|V|)$ time.
+        \item The dynamic programming step takes $\Theta(|V|+|E|)$ time, as it iterates over all vertices,
+        while accessing the edges incident on each vertex.
+        Analogous to a BFS traversal, the total number of iterations of the outer loop is $|V|$ and the inner loop is $|E|$.
+    \end{enumerate}
+    Dominated by the sorting step and the dynamic programming step, the time complexity of the algorithm is $\Theta(|V|+|E|)$.
+    \vfill
+    \pagebreak
+
+    \section*{Bibliography}
+    \begin{enumerate}
+        \item
+        \href{
+            https://iq.opengenus.org/find-cut-edges-in-a-graph/#:~:text=A%20cut%20edge%20e%20%3D%20uv,belong%20to%20the%20DFS%20tree.
+            }{\textbf{OpenGenius IQ:} How to find cut-edges in a Graph}
+        \item
+        \href{
+            https://math.stackexchange.com/questions/1729779/prove-that-an-edge-e-is-contained-in-a-cycle-iff-e-is-not-a-cut-edge-in-a-si
+        }{\textbf{USCB Math173A: (Lemma  1}) Cut-edges are not contained in cycles}
+    \end{enumerate}
+
+\end{document}
