@@ -86,23 +86,190 @@
     An edge-weighted connected undirected graph $G = (V, E)$ such that $|V| = n$ and $|E| = n + 20$.
 
     \subsection*{Output}
-    An edge $(u, v)$ with the smallest weight, connected in a cycle of $G$.
+    An edge $(v, w)$ with the smallest weight, connected in a cycle of $G$.
 
     \subsection*{Solution}
+    The given problem can be solved in $O(n)$ time using the concept of cut-edges.
+    We make use of the fact that cut-edges, by definition, are not included in any cycle in a graph, and all non-cut-edges are included in some cycle.
+    Hence, we can find the edge with the smallest weight in $G$ that is not a cut-edge.
 
     \subsubsection*{Terminologies and Definitions}
     \begin{definition}[Cut-Edge]
         \label{def:cut-edge}
-        An edge $(u, v) \in E$ is a cut-edge iff removing it from the graph $G = (V, E)$ disconnects $G$.
+        An edge $(v, w) \in E$ is a cut-edge iff removing it from the graph $G = (V, E)$ increases the number of connected components in $G$.
+        For a connected graph $G$, removal of a cut-edge disconnects $G$.
     \end{definition}
 
+    \subsubsection*{The Solution Description}
+    The solution simply involves finding and marking the cut-edges in $G$.
+    Once all edges are marked, we can find the edge with the smallest weight in $G$ that is not marked by iterating over $E$.
+
+    \begin{claim}
+        An edge $(v, w) \in E$ is a cut-edge iff it is not included in any cycle of $G$.
+    \end{claim}
+    \textit{Proof.}
+    \begin{quote}
+        $\Rightarrow$ (If $(v, w) \in E$ is a cut-edge, then it is not included in any cycle in $G$.) \\
+        We prove the contrapositive of the claim. \\
+        Let $e = (v, w) \in E$ be involved in a cycle. Then, there exists a path from $v$ to $w$ in $G$
+        that does not contain $e$, and hence, removing $e$ from $G$ does not disconnect $G$.
+        So, $e$ is not a cut-edge. \\
+        By contraposition, we have proved the forward implication.
+        \vspace*{7.5pt} \\
+        $\Leftarrow$ (If $(v, w) \in E$ is not included in any cycle in $G$, then it is a cut-edge.) \\
+        We prove the contrapositive of the claim. \\
+        Let $e = (v, w) \in E$ be a non-cut-edge. Then, we can safely remove $e$ from $G$ and still have a connected graph,
+        i.e., there still exists a path from $v$ to $w$ in $G$.
+        So $e$ must be included in some cycle. \\
+        By contraposition, we have proved the backward implication.
+        \vspace*{7.5pt} \\
+        Hence, the claim is proved. \hfill $\square$
+    \end{quote}
+    The above claim is the key to solving the problem in linear time, as the cut-edges can be identified in $G$ in $O(|V|+|E|)$ time.
+
     \subsubsection*{The complete Algorithm}
+    The complete algorithm consists of the following steps:
     \begin{enumerate}
-        \item Maintain a hash table $C[(u, v) \in E] \gets 0$ to mark the cut-edges.
-        \item Find all the cut-edges in $G$, which takes $O(|V| + |E|)$ time.
-        \item While finding the cut-edges, mark the edges that are cut-edges as $1$ in $C$.
-        \item Find the edge with the smallest weight in $E$ such that $C[e] \neq 1$.
+        \item Identify all the cut-edges and mark them.
+        \item Find the edge with the smallest weight in $E$ that is not marked.
     \end{enumerate}
+
+    \subsubsection*{Pseudocode for the Find-cut-edges subroutine}
+    To find the cut-edges of $G$, we use a subroutine $\Call{Find-cut-edges}{G}$.
+    The subroutine uses a DFS traversal on the input graph $G = (V, E)$ and returns a hash table $C$ of edges, in which
+    $C[e] = 1$ if and only if $e$ is a cut-edge.
+    \vspace*{10pt} \\
+    The algorithm uses a DFS traversal on the graph, while maintaining the following data structures:
+    \begin{enumerate}
+        \item $M[v \in V]$: To keep track of visited vertices.
+        \item $T_{in}[v \in V]$: To store the time at which a vertex is first visited.
+        \item $T_{low}[v \in V]$: To store the lowest time of discovery of all vertices reachable from $v$.
+        \item $C[e \in E]$: A hash table to mark the cut-edges.
+    \end{enumerate}
+    The main idea behind the algorithm is to correctly track and update the discovery times of each vertex $v$ and the lowest discovery time of all its ancestors.
+    \vspace*{10pt} \\
+    This ensures that if $T_{low}[w] > T_{in}[v]$, then $w$ cannot be reached from any of the ancestors of $v$.
+    If $w$ was reachable from any of the ancestors of $v$, then $T_{low}[w] \leq T_{in}[v]$, i.e. it would have already been visited,
+    in which case, $T_{low}[v]$ is updated to $T_{in}[w]$ if it's less than $T_{low}[v]$. \\
+    So, $(v, w) \in E$ cannot be a part of a cycle, and hence, must be a cut-edge.
+    \footnote{
+        A formal proof of correctness of this subroutine is given in the section \textbf{Proof of Correctness}.
+    }
+    \vspace*{10pt} \\
+    The pseudocode for the subroutine implemented using Tarjan's Algorithm is given in Algorithm~(\ref{alg:cut-edges}).
+    \footnote{
+        The subroutine assumes that the graph $G$ is connected and does not contain any self-loops.
+    }
+
+    \begin{algorithm}
+        \caption{Tarjan's Algorithm to mark the cut-edges in a connected graph $G$}
+        \label{alg:cut-edges}
+        \begin{algorithmic}[1]
+            \Procedure{Mark-cut-edges}{$G = (V, E)$}:
+                \State $M[v \in V] = T_{in}[v \in V] = T_{low}[v \in V] \gets 0$
+                \State $C[e \in E] \gets 0$
+                \State $t \gets 0$
+                \Procedure{Dfs}{$v$, $p$}:
+                    \State $M[v] \gets 1$
+                    \State $T_{in}[v] = T_{low}[v] \gets t$
+                    \State $t \gets t + 1$
+                    \For{$(v, w) \in E$}
+                        \If{$w = p$}
+                            \State \textbf{continue}
+                        \ElsIf{$M[w] = 0$}
+                            \State $\Call{Dfs}{w, v}$
+                            \State $T_{low}[v] \gets \min{\{T_{low}[v], T_{low}[w]\}}$
+                            \If{$T_{low}[w] > T_{in}[v]$}
+                                \State $C[(v, w)] \gets 1$
+                            \EndIf
+                        \Else
+                            \State $T_{low}[v] \gets \min{\{T_{low}[v], T_{in}[w]\}}$
+                        \EndIf
+                    \EndFor
+                \EndProcedure
+                \State $\Call{Dfs}{v_{0}, v_{0}}$ \Comment{$v_{0}$ is any arbitrary vertex in $V$}
+                \State \Return $C$
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsubsection*{Pseudocode for the complete algorithm}
+    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:cycle-edge}).
+    \vfill
+
+    \begin{algorithm}
+        \caption{An algorithm to find the least weight edge connected in a cycle of $G$}
+        \label{alg:cycle-edge}
+        \begin{algorithmic}[1]
+            \Procedure{Cycle-edge}{$G = (V, E)$}:
+                \State $C \gets \Call{Mark-cut-edges}{G}$
+                \State $e_{min}.weight \gets \infty$
+                \For{$e \in E$}
+                    \If{$C[e] = 0$}
+                        \If{$e.weight < e_{min}.weight$}
+                            \State $e_{min} \gets e$
+                        \EndIf
+                    \EndIf
+                \EndFor
+                \State \Return $e_{min}$
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsubsection*{Runtime Analysis of the Algorithm}
+    The algorithm makes use of the $\Call{Mark-cut-edges}{G}$ subroutine, which runs in $O(|V|+|E|)$ time.
+    This is because the subroutine only implements a modified DFS traversal on the graph, with modifications like
+    array lookups and hash table insertions. Since both of these operations take constant time, the total time
+    taken by the subroutine is $O(|V|+|E|)$.
+    \vspace*{10pt} \\
+    The main algorithm also runs in $O(|V|+|E|)$ time, since it only makes a single call to the subroutine
+    and the subsequent step iterates over the edge-set $E$ while maintaining a minimum edge $e_{min}$, which takes $\Theta(|E|)$ time.
+    \vspace*{10pt} \\
+    Hence, the total time taken by the algorithm is $O(|V|+|E|)$. \\
+    Since we're given $|V| = n$ and $|E| = n + 20$, the overall time complexity of the algorithm is $O(n)$.
+
+    \subsubsection*{Proof of Correctness}
+    The correctness of the algorithm can be proved by a series of the following claims:
+
+    \begin{claim}
+        The subroutine correctly identifies all cut-edges in the graph $G$.
+    \end{claim}
+    \textit{Proof.}
+    \begin{quote}
+        Suppose $(v, w)$ is a cut-edge in $G$. \\
+        By definition, $w$ cannot be reached from any of the ancestors of $v$.
+        So, $T_{in}[w]$, the discovery time of $w$, which is equal to $T_{low}[w]$ as it has not been explored yet,
+        must be greater than $T_{in}[v]$, the discovery time of $v$.
+        All such edges are marked by the subroutine. \\
+        Hence, the claim is proved. \hfill $\square$
+    \end{quote}
+
+    \begin{claim}
+        \label{claim:non-cut-edge}
+        The subroutine does not mark any non-cut-edge in the graph $G$.
+    \end{claim}
+    \textit{Proof.}
+    \begin{quote}
+        Suppose $(v, w)$ is a non-cut-edge in $G$. \\
+        By definition, $w$ can be reached from some ancestor of $v$.
+        So, $T_{low}[w]$, the lowest time of discovery of the vertices reachable from $w$,
+        must be at most equal to $T_{in}[v]$, the discovery time of $v$.
+        This is because $T_{low}[w]$ must have been relaxed to $T_{in}[v]$ at some point in the DFS traversal due to presence of a cycle.
+        Hence, the edge $(v, w)$ is not marked by the subroutine. \\
+        Hence, the claim is proved. \hfill $\square$
+    \end{quote}
+
+    \begin{claim}
+        The algorithm correctly identifies the least weight edge connected in a cycle of $G$.
+    \end{claim}
+    \textit{Proof.}
+    \begin{quote}
+        Suppose $e_{min}$ is the least weight edge connected in a cycle of $G$. \\
+        By definition, $e_{min}$ is not a cut-edge.
+        By Claim~(\ref{claim:non-cut-edge}), $e_{min}$ must not be marked.
+        Finding the least weight edge among the non-marked edges, hence, identifies the least weight edge connected in a cycle of $G$. \\
+        Hence, the claim is proved. \hfill $\square$
+    \end{quote}
 
     \pagebreak
 
@@ -188,15 +355,15 @@
         \item Iterate over the vertices in their topological order and tabulate $P$ using the above recurrence relation.
         \item Return $P[t_{1}], P[t_{2}], \dots, P[t_{k}]$, the total probabilities of reaching the sinks from $s$.
     \end{enumerate}
-    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:prob}).
+    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:sink-prob}).
     \footnote{
         The pseudocode of the algorithm makes use of notations introduced in the section \textbf{Notations Used}.
         Here, $P[v \in V_{T}]$ denotes a $|V_{T}| \times 1$ table ordered in the same way as $V_{T}$.
     }
 
     \begin{algorithm}
-        \caption{An algorithm to find the probabilities of reaching the sinks from $s$.}
-        \label{alg:prob}
+        \caption{An algorithm to find the probabilities of reaching the sinks from $s$}
+        \label{alg:sink-prob}
         \begin{algorithmic}[1]
             \Procedure{Sink-probability}{$G = (V, E)$}:
                 \State $V_{T} = \Call{Topological-sort}{G}$
@@ -230,11 +397,11 @@
         \item
         \href{
             https://iq.opengenus.org/find-cut-edges-in-a-graph/#:~:text=A%20cut%20edge%20e%20%3D%20uv,belong%20to%20the%20DFS%20tree.
-            }{\textbf{OpenGenius IQ:} How to find cut-edges in a Graph}
+            }{\textbf{OpenGenius IQ:} Tarjan's Algorithm to find cut-edges in a Graph}
         \item
         \href{
-            https://math.stackexchange.com/questions/1729779/prove-that-an-edge-e-is-contained-in-a-cycle-iff-e-is-not-a-cut-edge-in-a-si
-        }{\textbf{USCB Math173A: (Lemma  1}) Cut-edges are not contained in cycles}
+            http://web.math.ucsb.edu/~padraic/ucsb_2013_14/math137a_w2014/math137a_w2014_lecture3.pdf
+        }{\textbf{USCB Math137A: (Lemma 1}) Cut-edges are not contained in cycles}
     \end{enumerate}
 
 \end{document}
