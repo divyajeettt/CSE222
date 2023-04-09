@@ -55,24 +55,146 @@
     \end{enumerate}
 
     \subsection*{Input}
-    A directed graph $G = (V, E)^{*}$ representing the layout of the city.
+    A directed graph $G = (V, E)$ representing the layout of the city.
     $V$ is the set of all intersections and $E$ is the set of all one-way streets in Computopia.
-    \vspace*{10pt} \\
+    \vspace*{7.5pt} \\
     \textbf{Note:} \textit{Formulation of the problem as a graph theoretic problem is given in the subsequent subsection.}
 
     \subsection*{Output}
-    \begin{enumerate}[label=(\alph*)]
-        \item
-        A boolean value \textit{True} if the mayor's claim is true, else \textit{False}.
-        \item
-        A boolean value \textit{True} the mayor's weaker claim is true, else \textit{False}.
+    \begin{enumerate}[label=(\textbf{\alph*})]
+        \item A boolean value \textsc{True} if the mayor's claim holds, else \textsc{False}.
+        \item A boolean value \textsc{True} the mayor's weaker claim holds, and \textsc{False} otherwise.
     \end{enumerate}
 
     \subsection*{Solution}
-    \begin{enumerate}[label=(\alph*)]
-        \item Check if $G$ is strongly connected in linear time using Kosaraju's algorithm.
-        \item Check the townhall is a part of a strongly connected component in $G$.
+    The two sub-parts of the given problem can both be solved in linear time using the concept of strongly connected components in a directed graph.
+    By definition, a component of a graph $G$ is strongly connected if there exists a path from every vertex in the component to every other vertex in the component.
+    The following sections discuss approaches to solving the two sub-problems in detail.
+
+    \subsubsection*{Formulation as a graph theoretic problem}
+    Since the given problem deals with the layout of a city, it can be naturally solved using graphs.
+    Each intersection in the city can be considered as a vertex, $v \in V$, and each one-way street as a directed edge, $(u \to v) \in E$, where $u, v \in V$.
+    One-way streets naturally represent directed edges as both can only be traversed in one direction. \\
+    In this manner we create a graph $G = (V, E)$ based on the city's layout.
+    \footnote{For \textbf{Problem 1 (b)}, we assume that the town-hall is located at an intersection, $v_{t} \in V$.}
+
+    \subsection*{Problem 1 (a)}
+    \subsubsection*{The Solution Description}
+    This sub-part can be solved in linear time using the popular Kosaraju's Algorithm
+    \footnote{
+        Kosaraju's Algorithm was disucssed in Lecture-12 of the course \textbf{CSE222} by \href{mailto:debarka@iiitd.ac.in}{Dr Debarka Sengupta}, Winter 2023.
+    } to find strongly connected components in a directed graph.
+    According to the mayor's claim, we must be able to legally drive from any intersection from any other intersection in the city.
+    This can be achieved if and only if there exists a path between every pair of vertices in $G$.
+    This, by defintion, is equivalent to $G$ being strongly connected. \\
+    Hence, the mayor's claim would be considered true if and only if $G$ contains exactly one stronly connected component that contains all vertices $v \in V$.
+
+    \subsubsection*{The complete Algorithm and Pseudocode}
+    The complete algorithm consists of the following steps:
+    \begin{enumerate}
+        \item
+        Use Kosaraju's Algorithm to find all the strongly connected components of $G$.
+        The algorithm makes use of a DFS traversal on $G$ and $G^{T}$, the transposed graph of $G$.
+        \item Determine if there is exactly one strongly connected component, say $S$, and if $S$ contains all vertices $v \in V$.
     \end{enumerate}
+    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:claim-check}).
+
+    \begin{algorithm}
+        \caption{An algorithm to check the mayor's stronger claim}
+        \label{alg:claim-check}
+        \begin{algorithmic}[1]
+            \Procedure{Check-claim}{$G = (V, E)$}
+            \State $C \gets \Call{Kosaraju-algorithm}{G}$ \Comment{Returns a list of all SCCs in $G$}
+            \If{$|C| = 1$ \textbf{and} $|V| = |C[0]|$}
+                \State \Return \textsc{True}
+            \Else
+                \State \Return \textsc{False}
+            \EndIf
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsubsection*{Runtime Analysis of the Algorithm}
+    The algorithm determines the fallacy of the mayor's claim in linear time with respect to the number of intersections and one-way streets in the city. \\
+    It makes use of Kosaraju's Algorithm, which finds all SCCs in a graph in $O(|V|+|E|)$ time.
+    \vspace*{10pt} \\
+    Hence, dominated by the time complexity of Kosaraju's Algorithm, the time complexity of the algorithm is $O(|V|+|E|)$.
+
+    \subsubsection*{Proof of Correctness}
+    It can be proven that the algorithm correctly determines if one can legally drive to any intersection from any other intersection.
+    According to the mayor's claim, there must exist a path from every intersection to every other intersection.
+    Hence, the following cases may arise:
+    \begin{enumerate}
+        \item
+        If $G$ contains more than one SCC, then there exists a vertex $v \in V$ such that $v$ is not reachable from some vertex $u \in V$.
+        Hence, the mayor's claim is false.
+        \item
+        If $G$ contains exactly one SCC, but the SCC does not contain all vertices in $V$, then the mayor's claim is false.
+        In this case, there exists a vertex $v \in V$ such that $v$ is not reachable from any other vertex in $G$.
+        \item
+        If $G$ contains exactly one SCC containing all vertices in $V$, then the mayor's claim is true.
+        In this case, there exists a path from every vertex in $G$ to every other vertex in $G$.
+    \end{enumerate}
+    The algorithm handles all the above cases, and hence correctly determines the fallacy of the mayor's claim.
+
+    \subsection*{Problem 1 (b)}
+    \textbf{Assumption:} The town-hall is located at an intersection in Computopia.
+
+    \subsubsection*{The Solution Description}
+    This sub-part can be solved in linear time by using Kosaraju's algorithm again.
+    However, in this case, we must check if the town-hall is a part of a strongly component in $G$. \\
+    According to the mayor's weaker claim, all intersections reachable from the town-hall have at least one way to legally drive back to the town-hall.
+    This can be achieved if an only if the town-hall is a part of a strongly connected component in $G$. \\
+    Hence, the mayor's weaker claim would be considered true if and only if the town-hall is a part of a strongly connected component in $G$.
+
+    \subsubsection*{The complete Algorithm and Pseudocode}
+    The complete algorithm consists of the following steps:
+    \begin{enumerate}
+        \item
+        Use Kosaraju's Algorithm to find all the strongly connected components of $G$.
+        The algorithm makes use of a DFS traversal on $G$ and $G^{T}$, the transposed graph of $G$.
+        \item Determine if the town-hall is a part of a strongly connected component in $G$.
+    \end{enumerate}
+    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:check-weak-claim}).
+
+    \begin{algorithm}
+        \caption{An algorithm to check the mayor's weaker claim}
+        \label{alg:check-weak-claim}
+        \begin{algorithmic}[1]
+            \Procedure{Check-claim}{$G = (V, E), v_{t}$}
+            \State $C \gets \Call{Kosaraju-algorithm}{G}$ \Comment{Returns a list of all SCCs in $G$}
+            \For{$i \gets 1$ \textbf{to} $|C|$}
+                \If{$v_{t} \in C[i]$}
+                    \State \Return \textsc{True}
+                \EndIf
+            \EndFor
+            \State \Return \textsc{False}
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsubsection*{Runtime Analysis of the Algorithm}
+    The algorithm determines the fallacy of the mayor's claim in linear time with respect to the number of intersections and one-way streets in the city. \\
+    It again makes use of the $O(|V|+|E|)$ time Kosaraju's Algorithm.
+    The subsequent checking of whether the town-hall $v_{t}$ is a part of any of the SCCs takes at max $|V|$ operations.
+    This is because the total number of vertices in all the components combined is, at max, $|V|$.
+    \vspace*{10pt} \\
+    Hence, dominated by the time complexity of Kosaraju's Algorithm, the time complexity of the algorithm is $O(|V|+|E|)$.
+
+    \subsubsection*{Proof of Correctness}
+    It can be proven that the algorithm correctly determines if the mayor's weaker claim is true.
+    According to the mayor's weaker claim, an intersection reachable from the town-hall must have at least one way to legally drive back to the town-hall.
+    Hence, the following cases may arise:
+    \begin{enumerate}
+        \item
+        If the town-hall $v_{t}$ is not a part of any of the SCCs, then the mayor's weaker claim is false.
+        In this case, there exists some vertex $v \in V$ such that $v$ is reachable from the town-hall, but there is no way to legally drive back to the town-hall from $v$.
+        \item
+        If the town-hall $v_{t}$ is a part of a SCC, then the mayor's weaker claim is true.
+        By definition, a SCC contains all vertices that are reachable from each other.
+        Hence, there exists a path from every intersection reachable from the town-hall back to the town-hall.
+    \end{enumerate}
+    The algorithm handles all the above cases, and hence correctly determines the fallacy of the mayor's weaker claim.
 
     \pagebreak
 
@@ -96,16 +218,24 @@
     \subsubsection*{Terminologies and Definitions}
     \begin{definition}[Cut-Edge]
         \label{def:cut-edge}
-        An edge $(v, w) \in E$ is a cut-edge iff removing it from the graph $G = (V, E)$ increases the number of connected components in $G$.
+        An edge $(v, w) \in E$ is a cut-edge if removing it from the graph $G = (V, E)$ increases the number of connected components in $G$.
         For a connected graph $G$, removal of a cut-edge disconnects $G$.
     \end{definition}
+
+    \begin{figure}[htp]
+        \begin{center}
+            \includegraphics[width=0.65\textwidth]{cut-edge.png}
+        \end{center}
+        \caption{The thick edge is a cut-edge (removing it creates two connected components)}
+        \label{fig:cut-edge}
+    \end{figure}
 
     \subsubsection*{The Solution Description}
     The solution simply involves finding and marking the cut-edges in $G$.
     Once all edges are marked, we can find the edge with the smallest weight in $G$ that is not marked by iterating over $E$.
 
     \begin{claim}
-        An edge $(v, w) \in E$ is a cut-edge iff it is not included in any cycle of $G$.
+        An edge $(v, w) \in E$ is a cut-edge if it is not included in any cycle of $G$.
     \end{claim}
     \textit{Proof.}
     \begin{quote}
@@ -114,14 +244,14 @@
         Let $e = (v, w) \in E$ be involved in a cycle. Then, there exists a path from $v$ to $w$ in $G$
         that does not contain $e$, and hence, removing $e$ from $G$ does not disconnect $G$.
         So, $e$ is not a cut-edge. \\
-        By contraposition, we have proved the forward implication.
+        By contraposition, the forward implication is proved.
         \vspace*{7.5pt} \\
         $\Leftarrow$ (If $(v, w) \in E$ is not included in any cycle in $G$, then it is a cut-edge.) \\
         We prove the contrapositive of the claim. \\
         Let $e = (v, w) \in E$ be a non-cut-edge. Then, we can safely remove $e$ from $G$ and still have a connected graph,
         i.e., there still exists a path from $v$ to $w$ in $G$.
         So $e$ must be included in some cycle. \\
-        By contraposition, we have proved the backward implication.
+        By contraposition, the backward implication is proved.
         \vspace*{7.5pt} \\
         Hence, the claim is proved. \hfill $\square$
     \end{quote}
@@ -195,7 +325,6 @@
 
     \subsubsection*{Pseudocode for the complete algorithm}
     The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:cycle-edge}).
-    \vfill
 
     \begin{algorithm}
         \caption{An algorithm to find the least weight edge connected in a cycle of $G$}
@@ -228,8 +357,10 @@
     Hence, the total time taken by the algorithm is $O(|V|+|E|)$. \\
     Since we're given $|V| = n$ and $|E| = n + 20$, the overall time complexity of the algorithm is $O(n)$.
 
+    \vfill
+
     \subsubsection*{Proof of Correctness}
-    The correctness of the algorithm can be proved by a series of the following claims:
+    The correctness of the algorithm can be proved by a series of the following claims.
 
     \begin{claim}
         The subroutine correctly identifies all cut-edges in the graph $G$.
@@ -288,7 +419,17 @@
     After reaching any non-sink vertex $v$, the walk follows the edge $(v \to w)$ with probability $P[v \to w]$.
     All the probabilities are mutually independent. \\
     Describe and analyze an algorithm to compute the probability that this random walk reaches sink
-    $t_{i} \ \forall \ i \in \{ 1, 2, \dots, k \}$.
+    $t_{i} \ \forall \ i \in \{ 1, 2, \dots, k \}$. \\
+    An example of such a graph is shown in Figure~(\ref{fig:dag}).
+    \footnote{The weights are not shown for simplicity.}
+
+    \begin{figure}[htp]
+        \begin{center}
+            \includegraphics[width=0.45\textwidth]{dag.png}
+        \end{center}
+        \caption{A directed acyclic graph with a single source and several sinks.}
+        \label{fig:dag}
+    \end{figure}
 
     \subsection*{Input}
     A weighted directed acyclic graph $G = (V, E)$ having the above properties.
@@ -321,6 +462,14 @@
     When $G$ is sorted in the aforementioned fashion, then the vertices are ordered such that $v$ appears before $w$ if $(v \to w) \in E$.
     This allows us to calculate $P[w]$ by using the probabilities $P[v] \ \forall \ (v \to w) \in E$.
     This is possible because of equation \eqref{eq:total_weight} and the fact that the probabilities are mutually independent.
+
+    \begin{figure}[htp]
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{top-sort.png}
+        \end{center}
+        \caption{A topologically sorted version of the graph in Figure~(\ref{fig:dag}).}
+        \label{fig:top-sort}
+    \end{figure}
 
     \subsubsection*{Decomposition into Sub-Problems}
     The given problem of finding $P[t_{i}] \ \forall \ 1 \leq i \leq k$ is broken down into overlapping sub-problems of the form $P[v]$, where $v$ is not a sink.
@@ -378,6 +527,8 @@
             \EndProcedure
         \end{algorithmic}
     \end{algorithm}
+
+    \vfill
 
     \subsubsection*{Runtime Analysis of the Algorithm}
     The following operations are performed in the algorithm:
