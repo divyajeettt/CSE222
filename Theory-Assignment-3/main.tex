@@ -42,4 +42,128 @@
     \maketitle
 
     \section*{\huge{Problem}}
+    The towns and villages of the Island of Sunland are connected by an extensive rail network.
+    Doweltown is the capital of Sunland. Due to a deadly contagious disease,
+    a few casualties have been reported in the village of Tinkmoth. To prevent the disease from
+    spreading to Doweltown, the Ministry of Railway of Sunland wants to completely
+    cut down the rail communication between Tinkmoth and Doweltown. \\
+    For this, they wanted to put traffic blocks between pairs of stations, $x$ and $y$, that are
+    directly connected by a railway line (i.e., there are no stations between them on that line).
+    If a traffic block is put in between $x$ and $y$, then no train can travel from $x$ to $y$ from that
+    line. To minimize expense (and public notice), the authority wants to put as few traffic blocks
+    as possible. \\
+    Formulate the above as a flow-network problem and design a polynomial-time algorithm to
+    solve it. Give a precise justification of the running time of your algorithm.
+
+    \subsection*{Input}
+    An undirected graph $G = (V, E)$ representing the layout\footnote{
+        We assume that Tinkmoth and Doweltown have two distinct railway stations, $v_{t}, v_{d} \in V$.
+    } of the island, along with $v_{t}$ and $v_{d} \in V$, the railway stations of Tinkmoth and Doweltown. \\
+    $V$ is the set of all railway stations and $E$ is the set of all railway lines in Sunland.
+    \vspace*{7.5pt} \\
+    \textbf{Note:} \textit{Formulation of the problem as a flow-network problem is given in the subsequent subsection.}
+
+    \subsection*{Output}
+    The minimum number of traffic blocks to be installed to cut down the rail communication between Tinkmoth and Doweltown.
+
+    \subsection*{Solution}
+    The given problem can be solved using the concept of minimum cut in a flow-network.
+    By definition, a minimum cut in a flow-network is a minimal set of edges whose removal disconnects the source vertex from the sink.
+    Since we are required to find the minimum number of traffic blocks to be installed to disconnect the railway network between Tinkmoth and Doweltown,
+    we can find the number of edges in the minimum cut of $G$ and that would be the required number of traffic blocks.
+    The following sections discuss the apporach to solve the problem in detail.
+    \vfill
+
+    \subsubsection*{Formulation as a flow-network problem}
+    Since this problem deals with the railway network of a city, it can be naturally solved using graphs.
+    Each station on the Island can be considered as a vertex $v \in V$.
+    The railway lines connecting pairs of stations $u$ and $v$, can be considered as two directed edges $(u \to v) \in E$ and $(v \to u) \in E$. \\
+    Since the Ministry of Railway intends to stop the spread of infection from Tinkmoth to Doweltown, $v_{t}$ and $v_{d}$
+    can be considered as the source and the sink respectively.
+    Finally, the problem can be converted to a flow-network by assigning a capacity $c(u \to v)$ to each edge $(u \to v) \in E$ as follows:
+    \begin{equation}
+        \label{eq:capacity}
+        c(u \to v) = \begin{cases}
+            0 & \text{if $v = v_{t}$ or $u = v_{d}$} \\
+            1 & \text{otherwise} \\
+        \end{cases}
+    \end{equation}
+    For each edge $(u \to v_{t}) \in E$, capacity $c(u \to v_{t}) = 0$ signifies that $v_{t}$ is the source and no flow can enter it.
+    Similarly, $c(v_{d} \to w) = 0 \ \forall \ (v_{d} \to w) \in E$, as $v_{d}$ is the sink and no flow can exit it.
+    The capacity of all other edges is 1 as we can cut down communication between two stations using only one traffic block. \\
+    In this manner, we create a flow-network $G = (V, E)$ with $v_{t}$ as the source and $v_{d}$ as the sink, based on the island's railway network.
+    \hfill
+    \begin{figure}[htp]
+        \begin{center}
+            \includegraphics[width=0.6\textwidth]{network.png}
+        \end{center}
+        \caption{An example flow-network $G$ for the Island of Sunland.}
+        \label{fig:network}
+    \end{figure}
+    \linebreak
+    Figure (\ref{fig:network}) shows a rough diagram depicting the flow-network\footnote{
+        $v_{t}$ and $v_{d}$ represent the railway stations for Tinkmoth and Doweltown respectively.
+    } $G$ for the Island of Sunland.
+    Here, the red edges have a capacity of 0 and the rest have a capacity of 1.
+    This construction ensures that in the beginning, no flow can enter the source $v_{t}$ and no flow can exit the sink $v_{d}$.
+    \vspace*{10pt} \\
+    \textbf{Note:} \textit{Since flow is always calculated using simple paths, the maximum flow is actually independent of the initial capacities of the red edges.
+    This is because including them in any $v_{t}-v_{d}$ path would produce a cycle.
+    However, for the sake of argument, setting their capacities to 0 ensures that $v_{t}$ and $v_{d}$ behave as the source and the sink, even visibly.}
+    \vfill
+
+    \subsubsection*{The Solution Description}
+    The problem can be solved by using the Ford-Fulkerson Algorithm\footnote{
+        Ford-Fulkerson Algorithm was discussed in Lecture-17 of the course \textbf{CSE222} by \href{mailto:debarka@iiitd.ac.in}{Dr Debarka Sengupta},
+        Winter 2023.
+    } to find the maximum flow of the flow-network.
+    In our case, the maximum flow of the flow-network gives the maximum
+    number of ``paths'' through which the disease can spread from the source to the sink.
+
+    \begin{claim}
+        The maximum flow $f^{*}$ of the flow-network $G$ is equal $n^{*}$, to the minimum number of traffic blocks to be installed to cut down the
+        rail communication between Tinkmoth and Doweltown.
+    \end{claim}
+    \textit{Proof.}
+    \begin{quote}
+        By assignment (\ref{eq:capacity}), $f^{*}$ is equal to the number of simple paths from $v_{t}$ to $v_{d}$ that can be traversed simultaneously in $G$. \\
+        Each traffic block blocks one path, as an already used/blocked line cannot be involved in another path. So, there are exactly $n^{*}$ simple
+        paths from $v_{t}$ to $v_{d}$ in $G$. \\
+        Hence, $f^{*} = n^{*}$. \hfill $\square$
+    \end{quote}
+
+    \subsubsection*{The complete Algorithm and Psuedocode}
+    The complete algorithm involves the following steps:
+    \begin{enumerate}
+        \item Assign capacities to each edge as described in (\ref{eq:capacity}).
+        \item Apply the Ford-Fulkerson Algorithm on the flow-network with $v_{t}$ as the source and $v_{d}$ as the sink.
+        \item Return the value of the maximum flow.
+    \end{enumerate}
+
+    \begin{algorithm}[H]
+        \label{min-cut}
+        \caption{An algorithm to find the minimum number of traffic blocks required to cut down the rail communication between Tinkmoth and Doweltown}
+        \begin{algorithmic}[1]
+            \Procedure{Min-traffic-blocks}{$G = (V, E), v_{t}, v_{d}$}
+            \For {$(u \to v) \in E$}
+                \If {$v = v_{t}$ \textbf{or} $u = v_{d}$}
+                    \State $c(u \to v) \gets 0$
+                \Else
+                    \State $c(u \to v) \gets 1$
+                \EndIf
+            \EndFor
+            \State $f^{*} \gets \Call{Ford-fulkerson}{G, v_{t}, v_{d}}$
+            \State \Return $f^{*}$
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \subsection*{Runtime Analysis of the Algorithm}
+    The algorithm assigns capacities to each edge in $\Theta(|E|)$ steps.
+    It then makes use of the Ford-Fulkerson algorithm, which takes $O(|E| f^{*})$ time to find the maximum flow of the flow-network\footnote{
+        Here, $f^{*}$ denotes the maximum flow of the flow-network $G$.
+    }.
+    \vspace*{10pt} \\
+    Hence, dominated by the Ford-Fulkerson algorithm, the time complexity of the algorithm is $O(|E| f^{*})$.
+
 \end{document}
