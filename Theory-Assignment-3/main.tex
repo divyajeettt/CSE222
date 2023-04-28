@@ -72,30 +72,8 @@
     Since we are required to find the minimum number of traffic blocks required to disconnect the railway network between Tinkmoth and Doweltown,
     we can find the number of edges in a minimum cut of $G$.
     The following sections discuss the apporach to solve the problem in detail.
-    \vfill
 
     \subsubsection*{Notations Used}
-    \begin{notation}[$E_{t}$]
-        The set of all edges directed towards the source vertex $v_{t}$. Formally,
-        \begin{equation}
-            E_{t} = \{(u \to v_{t}) \in E \mid u \in V \setminus \{v_{t}\}\}
-        \end{equation}
-    \end{notation}
-
-    \begin{notation}[$E_{d}$]
-        The set of all edges directed away from the sink vertex $v_{d}$. Formally,
-        \begin{equation}
-            E_{d} = \{(v_{d} \to w) \in E \mid w \in V \setminus \{v_{d}\}\}
-        \end{equation}
-    \end{notation}
-
-    \begin{notation}[$C(E_{s})$]
-        The capacity of the cut $E_{s}$, i.e., the sum of the capacities of all edges in $E_{s}$.
-        \begin{equation}
-            C(E_{s}) = \sum_{(u \to v) \in E_{s}} c(u \to v)
-        \end{equation}
-    \end{notation}
-
     \begin{notation}[$f(u \to v)$]
         The flow of the edge $(u \to v) \in E$.
     \end{notation}
@@ -110,12 +88,12 @@
     \begin{equation}
         \label{eq:capacity}
         c(u \to v) = \begin{cases}
-            0 & \text{ if } (u \to v) \in E_{t} \cup E_{d} \\
+            0 & \text{ if $u = v_{d}$ or $v = v_{t}$} \\
             1 & \text{ otherwise} \\
         \end{cases}
     \end{equation}
-    The capacity of all edges in $E_{t}$ is 0 to indicate that $v_{t}$ is the source and no flow can enter it.
-    Similarly, the capacity of edges in $E_{d}$ is 0, as $v_{d}$ is the sink and no flow can exit it.
+    For each edge $(u \to v_{t})$, $c(u \to v_{t}) = 0$ signifies that $v_{t}$ is the source and no flow can enter it.
+    Similarly, $c(v_{d} \to w) = 0 \ \forall \ (v_{d} \to w) \in E$ as $v_{d}$ is the sink and no flow can exit it.
     The capacity of all other edges is 1 as we can cut down communication between two stations using only one traffic block. \\
     In this manner, we create a flow-network $G = (V, E)$ with $v_{t}$ as the source and $v_{d}$ as the sink, based on the island's railway network. \hfill
     \begin{figure}[htp]
@@ -158,7 +136,7 @@
         paths from $v_{t}$ to $v_{d}$ in $G$. \\
         Hence, $f^{*} = n^{*}$. \hfill $\square$
     \end{quote}
-    \vfill
+    \vspace*{10pt}
     However, the Ford-Fulkerson Algorithm runs in pseudo-polynomial time, as it is a multiplicative of the maximum flow of the network,
     which can be arbitrarily large (exponential in the input size).
     Hence, to solve the given problem in polynomial time, we make the following (very crucial) claim.
@@ -166,7 +144,7 @@
 
     \begin{claim}
         \label{claim:polynomial}
-        The maximum flow of a flow-network is linear in the number of edges when
+        The maximum flow of a flow-network is linear in the number of vertices when
         the capacities are assigned as described in (\ref{eq:capacity}).
     \end{claim}
     \textit{Proof.}
@@ -174,18 +152,17 @@
         Let $G = (V, E)$ be a flow-network with a source $v_{t}$ and a sink $v_{d}$, with maximum flow $f^{*}$.
         Assume that capacities assigned to all edges in $E$ as described in (\ref{eq:capacity}).
         \vspace*{10pt} \\
-        Any minimum cut $M^{*} = (V_{t}, V_{d})$ is a partition of the vertices, or a subset of the edges in $G$. Then $C(M^{*}) \leq |E|$. \\
-        This is because, by construction, all edges $(u \to v)$ with $u \in V_{t}$ and $v \in V_{d}$ have a capacity of 1.
-        So, $C(M^{*}) = O(|E|)$. By the \textit{Max-Cut Min-Flow} Theorem\footnote{
-            Max-Cut Min-Flow theorem was discussed in Lecture-17 of the course \textbf{CSE222} by \href{mailto:debarka@iiitd.ac.in}{Dr Debarka Sengupta},
-            Winter 2023.
-        }, the maximum flow of a flow-network is equal to the capacity of its minimum cut, i.e., $f^{*} = C(M^{*})$.
+        Note that $f^{*}$ in $G$ is bounded above by $|V_{t}|$, where $V_{t}$ is the set of vertices connected to $v_{t}$.
+        This is because, at best, only as much flow can reach the sink as much leaves the source.
+        \begin{equation}
+            f^{*} \leq \sum_{w \in V_{t}} f(v_{t} \to w) \leq \sum_{w \in V_{t}} c(v_{t} \to w) = \sum_{w \in V_{t}} 1 = |V_{t}| \leq |V|
+        \end{equation}
         \vspace*{10pt} \\
-        Hence, $f^{*} = O(|E|)$. \hfill $\square$
+        Hence, $f^{*} \leq |V_{t}| \leq |V| \implies f^{*} = O(|V|)$. \hfill $\square$
     \end{quote}
     \vspace*{10pt}
     The above claim is key to solving the problem in polynomial time.
-    The Ford-Fulkerson Algorithm runs in polynomial time when the maximum flow is polynomial in the number of edges.
+    The Ford-Fulkerson Algorithm runs in polynomial time when the maximum flow is polynomial in the number of vertices.
 
     \subsubsection*{The complete Algorithm and Psuedocode}
     The complete algorithm involves the following steps:
@@ -195,8 +172,6 @@
         \item Return the value of the maximum flow.
     \end{enumerate}
     The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:min-traffic-blocks}).
-    \vfill
-    \pagebreak
 
     \begin{algorithm}[H]
         \caption{An algorithm to find the minimum number of traffic blocks required to cut down the rail communication between Tinkmoth and Doweltown}
@@ -215,15 +190,16 @@
             \EndProcedure
         \end{algorithmic}
     \end{algorithm}
+    \vfill
 
     \subsection*{Runtime Analysis of the Algorithm}
     The algorithm assigns capacities to each edge in $\Theta(|E|)$ steps.
     It then makes use of the Ford-Fulkerson algorithm, which takes $O(|E| f^{*})$ time to find the maximum flow of the flow-network\footnote{
         Here, $f^{*}$ denotes the maximum flow of the flow-network $G$.
     }. \\
-    However, claim (\ref{claim:polynomial}) proves that $f^{*} = O(|E|)$.
-    Therefore, in the above solution, Ford-Fulkerson algorithm takes $O(|E|^{2})$ time.
+    However, claim (\ref{claim:polynomial}) proves that $f^{*} = O(|V|)$.
+    Therefore, in the above solution, Ford-Fulkerson algorithm takes $O(|E||V|)$ time.
     \vspace*{10pt} \\
-    Hence, dominated by the runtime of the Ford-Fulkerson algorithm, the time complexity of the algorithm is $O(|E|^{2})$.
+    Hence, dominated by the runtime of the Ford-Fulkerson algorithm, the time complexity of the algorithm is $O(|E||V|)$.
 
 \end{document}
