@@ -52,8 +52,7 @@
     A defective square $P = (x, y)$ on the board ($1 \le x, y \le N$, measured from top-left given in the format of (row, column)).
 
     \subsection*{Output}
-    A proper tiling of $S$, wherein each tile may be represented using a
-    unique integer.
+    A proper tiling of $S$, wherein each tile may be represented using a unique integer.
 
     \subsection*{Solution}
     The given problem is a naturally recursive problem.
@@ -423,12 +422,9 @@
         \begin{algorithmic}[1]
             \Procedure{Largest-intersecting-subset}{$L[1:n]$}:
                 \State \Call{Merge-sort}{$L[1:n]$}
-                \State $X[1:n] \gets 0$
-                \For{$i \gets 1$ to $n$}
-                    \State $X[i] \gets L[i].x_{1}$
-                \EndFor
+                \State $X[1:n] \gets L[1:n].x_{1}$
                 \State $len \gets 1$
-                \State $dp[1:n] = S[i:n] \gets 0$
+                \State $dp[1:n] = S[1:n] \gets 0$
                 \State $S[1] \gets 1$
                 \State $dp[1] \gets X[1]$
                 \For{$i \gets 2$ to $n$}
@@ -451,7 +447,7 @@
     \subsubsection*{Runtime Analysis of the Algorithm}
     The following operations are performed in the algorithm:
     \begin{enumerate}
-        \item $\Call{Merge-sort}{L[1:n]}$
+        \item $\Call{Merge-sort}{L[1:n]}$:
         This step takes $\Theta(n \log{n})$ time, where $n$ is the number of line segments in $L$.
         \item Copy the $x_{1}$-coordinates of the line segments into a new array $X[1:n]$.
         This step takes $\Theta(n)$ time, as we linearly loop over $L$ once.
@@ -496,12 +492,11 @@
                 $L[k+1]$ intersects some (not all) line segment(s) in $L[1:k]$.
             \end{case}
             Let $m = \max_{1 \le j < k} (S[j])$.
-            Then, $m$ is the maximum number of mutually intersecting line segments that also intersect with $L[k+1]$.
-            The length of the \textit{largest intersecting subset} of $L[1:k+1]$ is $1 + m$.
-            \footnote{
+            Then, $m$\footnote{
                 The algorithm finds $m$ using the Longest Decreasing Subsequence algorithm.
                 Refer to \textit{Reason for Sorting} under \textbf{Preprocessing}.
-            }
+            } is the maximum number of mutually intersecting line segments that also intersect with $L[k+1]$.
+            The length of the \textit{largest intersecting subset} of $L[1:k+1]$ is $1 + m$.
             \item
             \begin{case}
                 $L[k+1]$ intersects all the line segments in $L[1:k]$.
@@ -611,7 +606,7 @@
     The recurrence relation for $M[i, C]$ ensures that company $C$ can be chosen for no more than 2 consecutive weeks.
 
     \subsubsection*{Base Case and Solvable Sub-Problems}
-    The base case of the above given recurrence relations for the three companies are:
+    The base case of the above recurrence relations for the three companies are:
     \begin{align}
         M[i, A] &= \begin{cases}
             0 & \text{if } i = 0 \\
@@ -655,17 +650,16 @@
     The complete algorithm consists of the following steps:
     \begin{enumerate}
         \item Initialize the dynmaic programming table following the base case.
-        \item If $n > 3$, iterate over $i$ from 4 to $n$ and tabulate $M$ using the above given recurrence relations.
+        \item If $n > 3$, iterate over $i$ from 4 to $n$ and tabulate $M$ using the above recurrence relations.
         \item Return $\min{M[n]}$. This is the minimum cost of shipping till the end of the $n^{th}$ week.
     \end{enumerate}
-    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:mincost}).
-    \footnote{
+    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:mincost})\footnote{
         The pseudocode of the algorithm makes use of notations introduced in the section \textbf{Notations Used} to make it concise.
         While implementing the algorithm, notations like $A_{i}$ or $Paths[i]$ can be coded as macros or smaller $\Theta(1)$ subroutines.
-    }
+    }.
 
     \begin{algorithm}
-        \caption{An algorithm to find the minimum cost of shipping till the end of the $n^{th}$ week.}
+        \caption{An algorithm to find the minimum cost of shipping till the end of the $n^{th}$ week}
         \label{alg:mincost}
         \begin{algorithmic}[1]
             \Procedure{Find-min-cost}{$s[1:n]$, $a$, $b$, $c$, $d$}:
@@ -706,6 +700,6 @@
         \href{
             https://www.geeksforgeeks.org/longest-decreasing-subsequence/
         }{\textbf{GeeksforGeeks:} Longest Decreasing Subsequence}
-     \end{enumerate}
+    \end{enumerate}
 
 \end{document}

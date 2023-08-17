@@ -26,8 +26,6 @@
 
 \author{
     \href{mailto:divyajeet21529@iiitd.ac.in}{Divyajeet Singh (2021529)}
-    \and
-    \href{mailto:agamdeep21306@iiitd.ac.in}{Agamdeep Singh (2021306)}
 }
 
 \date{
@@ -75,8 +73,9 @@
 
     \subsubsection*{Notations Used}
     \begin{notation}[$f(u \to v)$]
-        The flow of the edge $(u \to v) \in E$.
+        The flow through the edge $(u \to v) \in E$.
     \end{notation}
+    \vfill
 
     \subsubsection*{Formulation as a flow-network problem}
     Since this problem deals with the railway network of a city, it can be naturally solved using graphs.
@@ -89,7 +88,7 @@
         \label{eq:capacity}
         c(u \to v) = \begin{cases}
             0 & \text{ if $u = v_{d}$ or $v = v_{t}$} \\
-            1 & \text{ otherwise} \\
+            1 & \text{ otherwise}
         \end{cases}
     \end{equation}
     For each edge $(u \to v_{t})$, $c(u \to v_{t}) = 0$ signifies that $v_{t}$ is the source and no flow can enter it.
@@ -104,9 +103,7 @@
         \label{fig:network}
     \end{figure}
     \vspace*{10pt} \linebreak
-    Figure (\ref{fig:network}) shows a rough diagram depicting the flow-network\footnote{
-        $v_{t}$ and $v_{d}$ represent the railway stations for Tinkmoth and Doweltown respectively.
-    } $G$ for the Island of Sunland.
+    Figure (\ref{fig:network}) shows a rough diagram depicting the flow-network $G$ for the Island of Sunland.
     Here, the red edges have a capacity of 0 and the rest have a capacity of 1.
     This construction ensures that in the beginning, no flow can enter the source $v_{t}$ and no flow can exit the sink $v_{d}$.
     \vspace*{10pt} \\
@@ -121,7 +118,6 @@
     } to find the maximum flow of the flow-network.
     In our case, the maximum flow of the flow-network gives the maximum
     number of \textit{paths} through which the disease can spread from the source to the sink.
-    \vspace*{10pt}
 
     \begin{claim}
         \label{claim:max-flow-min-cut}
@@ -136,11 +132,9 @@
         paths from $v_{t}$ to $v_{d}$ in $G$. \\
         Hence, $f^{*} = n^{*}$. \hfill $\square$
     \end{quote}
-    \vspace*{10pt}
     However, the Ford-Fulkerson Algorithm runs in pseudo-polynomial time, as it is a multiplicative of the maximum flow of the network,
     which can be arbitrarily large (exponential in the input size).
     Hence, to solve the given problem in polynomial time, we make the following (very crucial) claim.
-    \vspace*{10pt}
 
     \begin{claim}
         \label{claim:polynomial}
@@ -152,17 +146,16 @@
         Let $G = (V, E)$ be a flow-network with a source $v_{t}$ and a sink $v_{d}$, with maximum flow $f^{*}$.
         Assume that capacities assigned to all edges in $E$ as described in (\ref{eq:capacity}).
         \vspace*{10pt} \\
-        Note that $f^{*}$ in $G$ is bounded above by $|V_{t}|$, where $V_{t}$ is the set of vertices connected to $v_{t}$.
+        Then, $f^{*}$ in $G$ is bounded above by $|V_{t}|$, where $V_{t}$ is the set of vertices connected to $v_{t}$.
         This is because, at best, only as much flow can reach the sink as much leaves the source.
         \begin{equation}
             f^{*} \leq \sum_{w \in V_{t}} f(v_{t} \to w) \leq \sum_{w \in V_{t}} c(v_{t} \to w) = \sum_{w \in V_{t}} 1 = |V_{t}| \leq |V|
         \end{equation}
-        \vspace*{10pt} \\
         Hence, $f^{*} \leq |V_{t}| \leq |V| \implies f^{*} = O(|V|)$. \hfill $\square$
     \end{quote}
-    \vspace*{10pt}
+    \vfill
     The above claim is key to solving the problem in polynomial time.
-    The Ford-Fulkerson Algorithm runs in polynomial time when the maximum flow is polynomial in the number of vertices.
+    As a by-product of claim (\ref{claim:polynomial}), the Ford-Fulkerson Algorithm runs in polynomial time when the maximum flow is polynomial in the number of vertices.
 
     \subsubsection*{The complete Algorithm and Psuedocode}
     The complete algorithm involves the following steps:
@@ -190,7 +183,6 @@
             \EndProcedure
         \end{algorithmic}
     \end{algorithm}
-    \vfill
 
     \subsection*{Runtime Analysis of the Algorithm}
     The algorithm assigns capacities to each edge in $\Theta(|E|)$ steps.
@@ -201,5 +193,6 @@
     Therefore, in the above solution, Ford-Fulkerson algorithm takes $O(|E||V|)$ time.
     \vspace*{10pt} \\
     Hence, dominated by the runtime of the Ford-Fulkerson algorithm, the time complexity of the algorithm is $O(|E||V|)$.
+    \vfill
 
 \end{document}
