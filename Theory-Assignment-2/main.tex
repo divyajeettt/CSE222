@@ -8,6 +8,7 @@
 \usepackage{amsfonts}
 \usepackage{enumitem}
 \usepackage{algorithm}
+\usepackage{centernot}
 \usepackage{algpseudocode}
 
 
@@ -47,13 +48,15 @@
         Formulate this problem as a graph theoretic problem and explain why it can be solved in linear time.
         \item
         Suppose the mayor's claim was found to be wrong. She has now made a weaker claim:
-        \textit{"If you start driving from the town-hall, navigating one-way streets, then no matter where you reach,
-        there is always a way to drive legally back to the town-hall."}
+        \textit{``If you start driving from the town-hall, navigating one-way streets, then no matter where you reach,
+        there is always a way to drive legally back to the town-hall.''}
         Formulate this weaker property as a graph theoretic problem and explain how it can be solved in linear time.
     \end{enumerate}
 
     \subsection*{Input}
-    A directed graph $G = (V, E)$ representing the layout of the city.
+    A directed graph $G = (V, E)$ representing the layout\footnote{
+        For \textbf{Problem 1 (b)}, we assume that the town-hall is located at an intersection, $v_{t} \in V$.
+    } of the city, along with $v_{t} \in V$, the town-hall. \\
     $V$ is the set of all intersections and $E$ is the set of all one-way streets in Computopia.
     \vspace*{7.5pt} \\
     \textbf{Note:} \textit{Formulation of the problem as a graph theoretic problem is given in the subsequent subsection.}
@@ -73,13 +76,11 @@
     Since the given problem deals with the layout of a city, it can be naturally solved using graphs.
     Each intersection in the city can be considered as a vertex, $v \in V$, and each one-way street as a directed edge, $(u \to v) \in E$, where $u, v \in V$.
     One-way streets naturally represent directed edges as both can only be traversed in one direction. \\
-    In this manner we create a graph $G = (V, E)$ based on the city's layout.
-    \footnote{For \textbf{Problem 1 (b)}, we assume that the town-hall is located at an intersection, $v_{t} \in V$.}
+    In this manner, we create a graph $G = (V, E)$ based on the city's layout.
 
     \subsection*{Problem 1 (a)}
     \subsubsection*{The Solution Description}
-    This sub-part can be solved in linear time using the popular Kosaraju's Algorithm
-    \footnote{
+    This sub-part can be solved in linear time using the popular Kosaraju's Algorithm\footnote{
         Kosaraju's Algorithm was disucssed in Lecture-12 of the course \textbf{CSE222} by \href{mailto:debarka@iiitd.ac.in}{Dr Debarka Sengupta}, Winter 2023.
     } to find strongly connected components in a directed graph.
     According to the mayor's claim, we must be able to legally drive from any intersection from any other intersection in the city.
@@ -91,7 +92,7 @@
     The complete algorithm consists of the following steps:
     \begin{enumerate}
         \item
-        Use Kosaraju's Algorithm to find all the strongly connected components of $G$.
+        Use Kosaraju's Algorithm to find all strongly connected components of $G$.
         The algorithm makes use of a DFS traversal on $G$ and $G^{T}$, the transposed graph of $G$.
         \item Determine if there is exactly one strongly connected component, say $S$, and if $S$ contains all vertices $v \in V$.
     \end{enumerate}
@@ -136,24 +137,25 @@
     The algorithm handles all the above cases, and hence correctly determines the fallacy of the mayor's claim.
 
     \subsection*{Problem 1 (b)}
-    \textbf{Assumption:} The town-hall is located at an intersection in Computopia.
+    \textbf{Assumption:} The town-hall is located at an intersection, $v_{t} \in V$, in Computopia.
 
     \subsubsection*{The Solution Description}
-    This sub-part can be solved in linear time by using Kosaraju's algorithm again.
-    However, in this case, we must check if the town-hall is a part of a strongly component in $G$. \\
+    This sub-part can be solved in linear time by using Kosaraju's algorithm again. \\
     According to the mayor's weaker claim, all intersections reachable from the town-hall have at least one way to legally drive back to the town-hall.
-    This can be achieved if an only if the town-hall is a part of a strongly connected component in $G$. \\
-    Hence, the mayor's weaker claim would be considered true if and only if the town-hall is a part of a strongly connected component in $G$.
+    This can be achieved if an only if all intersections reachable from the town-hall belong to the same strongly connected component in $G$. \\
+    Hence, the mayor's weaker claim would be considered true if and only if te aforementioned condition holds true.
 
     \subsubsection*{The complete Algorithm and Pseudocode}
     The complete algorithm consists of the following steps:
     \begin{enumerate}
-        \item
-        Use Kosaraju's Algorithm to find all the strongly connected components of $G$.
-        The algorithm makes use of a DFS traversal on $G$ and $G^{T}$, the transposed graph of $G$.
-        \item Determine if the town-hall is a part of a strongly connected component in $G$.
+        \item Use Kosaraju's Algorithm to find all strongly connected components of $G$.
+        \item Find the strongly connected components $C[v]$\footnote{
+            $C[v]$ denotes the strongly connected component that contains the vertex $v \in V$. This is a slight abuse of notation, as $C[u] = C[v] \centernot\implies u = v$ for some $u, v \in V$.
+        } that contain each vertex $v \in V$. A union-find data structure can be used to achieve this efficiently.
+        \item For each vertex $u \in C[v_{t}]$, determine if $v \in C[v_{t}]$ for each $(u \to v) \in E$.
     \end{enumerate}
     The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:check-weak-claim}).
+    \vspace*{5pt}
 
     \begin{algorithm}
         \caption{An algorithm to check the mayor's weaker claim}
@@ -161,12 +163,14 @@
         \begin{algorithmic}[1]
             \Procedure{Check-claim}{$G = (V, E), v_{t}$}
             \State $C \gets \Call{Kosaraju-algorithm}{G}$ \Comment{Returns a list of all SCCs in $G$}
-            \For{$i \gets 1$ \textbf{to} $|C|$}
-                \If{$v_{t} \in C[i]$}
-                    \State \Return \textsc{True}
-                \EndIf
+            \For{$u \in C[v_{t}]$}
+                \For{$(u \to v) \in E$}
+                    \If{$v \notin C[v_{t}]$}
+                        \State \Return \textsc{False}
+                    \EndIf
+                \EndFor
             \EndFor
-            \State \Return \textsc{False}
+            \State \Return \textsc{True}
             \EndProcedure
         \end{algorithmic}
     \end{algorithm}
@@ -174,10 +178,11 @@
     \subsubsection*{Runtime Analysis of the Algorithm}
     The algorithm determines the fallacy of the mayor's claim in linear time with respect to the number of intersections and one-way streets in the city. \\
     It again makes use of the $O(|V|+|E|)$ time Kosaraju's Algorithm.
-    The subsequent checking of whether the town-hall $v_{t}$ is a part of any of the SCCs takes at max $|V|$ operations.
-    This is because the total number of vertices in all the components combined is, at max, $|V|$.
+    A UFDS can check the membership of each vertex in an SCC in constant time.
+    Moreover, $|C[v_{t}]| = O(|V|)$, and can contain at most $|E|$ edges.
+    So this step also runs in $O(|V|+|E|)$ time.
     \vspace*{10pt} \\
-    Hence, dominated by the time complexity of Kosaraju's Algorithm, the time complexity of the algorithm is $O(|V|+|E|)$.
+    Hence, the overall time complexity of the algorithm is $O(|V|+|E|)$.
 
     \subsubsection*{Proof of Correctness}
     It can be proven that the algorithm correctly determines if the mayor's weaker claim is true.
@@ -185,14 +190,14 @@
     Hence, the following cases may arise:
     \begin{enumerate}
         \item
-        If the town-hall $v_{t}$ is not a part of any of the SCCs, then the mayor's weaker claim is false.
-        In this case, there exists some vertex $v \in V$ such that $v$ is reachable from the town-hall, but there is no way to legally drive back to the town-hall from $v$.
+        There is a vertex $v \in V$ for some $u \in C[v_{t}]$ such that $(u \to v) \in E$ but $v \notin C[v_{t}]$.
+        This implies that $v$ is reachable from $u$ (thereby from $v_{t}$), but there is no way to legally drive back to the town-hall from $v$.
         \item
-        If the town-hall $v_{t}$ is a part of a SCC, then the mayor's weaker claim is true.
-        By definition, a SCC contains all vertices that are reachable from each other.
+        For every $u \in C[v_{t}]$, $v \in C[v_{t}]$ for all $(u \to v) \in E$.
+        This means that every intersection reachable from the town-hall belongs to the same SCC as $v_{t}$.
         Hence, there exists a path from every intersection reachable from the town-hall back to the town-hall.
     \end{enumerate}
-    The algorithm handles all the above cases, and hence correctly determines the fallacy of the mayor's weaker claim.
+    The algorithm handles both the above cases, and hence correctly determines the fallacy of the mayor's weaker claim.
 
     \pagebreak
 
@@ -279,15 +284,13 @@
     This ensures that if $T_{low}[w] > T_{in}[v]$, then $w$ cannot be reached from any of the ancestors of $v$.
     If $w$ was reachable from any of the ancestors of $v$, then $T_{low}[w] \leq T_{in}[v]$, i.e. it would have already been visited,
     in which case, $T_{low}[v]$ is updated to $T_{in}[w]$ if it's less than $T_{low}[v]$. \\
-    So, $(v, w) \in E$ cannot be a part of a cycle, and hence, must be a cut-edge.
-    \footnote{
+    So, $(v, w) \in E$ cannot be a part of a cycle, and hence, must be a cut-edge\footnote{
         A formal proof of correctness of this subroutine is given in the section \textbf{Proof of Correctness}.
-    }
+    }.
     \vspace*{10pt} \\
-    The pseudocode for the subroutine implemented using Tarjan's Algorithm is given in Algorithm~(\ref{alg:cut-edges}).
-    \footnote{
+    The pseudocode for the subroutine implemented using Tarjan's Algorithm is given in Algorithm~(\ref{alg:cut-edges})\footnote{
         The subroutine assumes that the graph $G$ is connected and does not contain any self-loops.
-    }
+    }.
 
     \begin{algorithm}
         \caption{Tarjan's Algorithm to mark the cut-edges in a connected graph $G$}
@@ -402,7 +405,7 @@
 
     \pagebreak
 
-    \section*{\huge{Problem3}}
+    \section*{\huge{Problem-3}}
     Suppose that $G$ is a directed acyclic graph with the following features:
     \begin{itemize}
         \item $G$ has a single source $s$ and several sinks $t_{1}, t_{2}, \dots, t_{k}$.
@@ -418,8 +421,7 @@
     All the probabilities are mutually independent. \\
     Describe and analyze an algorithm to compute the probability that this random walk reaches sink
     $t_{i} \ \forall \ i \in \{ 1, 2, \dots, k \}$. \\
-    An example of such a graph is shown in Figure~(\ref{fig:dag}).
-    \footnote{The weights are not shown for simplicity.}
+    An example of such a graph is shown in Figure~(\ref{fig:dag})\footnote{The weights are not shown for simplicity.}.
 
     \begin{figure}[htp]
         \begin{center}
@@ -502,11 +504,10 @@
         \item Iterate over the vertices in their topological order and tabulate $P$ using the above recurrence relation.
         \item Return $P[t_{1}], P[t_{2}], \dots, P[t_{k}]$, the total probabilities of reaching the sinks from $s$.
     \end{enumerate}
-    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:sink-prob}).
-    \footnote{
+    The pseudocode for the complete algorithm is given in Algorithm~(\ref{alg:sink-prob})\footnote{
         The pseudocode of the algorithm makes use of notations introduced in the section \textbf{Notations Used}.
         Here, $P[v \in V_{T}]$ denotes a $|V_{T}| \times 1$ table ordered in the same way as $V_{T}$.
-    }
+    }.
 
     \begin{algorithm}
         \caption{An algorithm to find the probabilities of reaching the sinks from $s$}
